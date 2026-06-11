@@ -72,9 +72,8 @@ HTML_TEMPLATE = """
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 10px; color: #333; }
         .container { max-width: 1000px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); margin: 0 auto; }
-        .logo-wrapper { text-align: center; margin-bottom: 15px; padding-top: 10px; }
-        .logo-img { max-width: 280px; height: auto; }
-        h1 { color: #002244; text-align: center; font-size: 20px; margin-top: 5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .logo-wrapper { text-align: center; margin-bottom: 25px; padding-top: 10px; }
+        h1 { color: #002244; text-align: center; font-size: 24px; margin-top: 5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
         .lider-box { background: linear-gradient(135deg, #007D8F, #005662); color: white; padding: 12px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,125,143,0.2); }
         .login-bar { background: #002244; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; }
         .login-bar a { color: #00EDFF; text-decoration: none; margin-left: 10px; }
@@ -105,10 +104,6 @@ HTML_TEMPLATE = """
     <div class="container">
         
         <div class="logo-wrapper">
-            <svg class="logo-img" viewBox="0 0 350 45" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 0h55.2c16.1 0 26.6 9.4 26.6 22.1s-10.5 22.1-26.6 22.1H0V0zm53.4 34.6c8.5 0 13.5-4.7 13.5-12.5s-5-12.5-13.5-12.5H14.6v25H53.4zM92.3 0h47.2v9.6h-32.6v7.7h29.8v9.5h-29.8v7.7h33.2v10H92.3V0zm94 22.7c0-13.5-10.4-23.4-24.8-23.4-15 0-25 10.3-25 22.8 0 13 10.2 22.4 25.6 22.4 9.9 0 17.2-3.7 21.8-9.4l-7.7-5.5c-3.1 3.8-7.7 5.6-13.6 5.6-8.8 0-14.7-5-15.3-12.5h43.7c.2-.7.3-1.4.3-2.7zm-39.2-4.1c.9-6 6.1-9.9 13.8-9.9 7.3 0 12.6 3.8 13.5 9.9h-27.3zM232.5 44.5l-6.8-10h-23.2v10h-14.6V0h36.7c13.7 0 22.4 7.4 22.4 17.5 0 7.3-4.6 13.1-12.3 15.6l8.8 11.4h-11zm-5.1-27c0-5-3.8-8-9.7-8h-22.1v16h22.1c5.9 0 9.7-3 9.7-8zM263.8 9.6V44.5h-14.6V9.6h-15.3V0h45.2v9.6h-15.3zM302.3 0v44.5H287.7V25.2h-21.7v19.3h-14.6V0h14.6v15.7h21.7V0h14.6zm14.1 0h14.6v34.9h27.4v9.6h-42V0zm51.4 22.2c0 13-10.3 22.8-25.2 22.8-15 0-25.2-9.8-25.2-22.8C317.4 9.3 327.6-.5 342.6-.5c15 0 25.2 9.8 25.2 22.7zm-35.4.1c0 7.9 4.6 13.2 10.2 13.2 5.6 0 10.2-5.3 10.2-13.2 0-7.8-4.6-13.1-10.2-13.1-5.6 0-10.2 5.3-10.2 13.1z" fill="#002244"/>
-                <path d="M407.3 22.2c0-11-7-19.6-18.7-21.7-1.3-.2-2.7-.3-4.1-.3-14.7 0-25.1 11.2-25.1 22.5 0 10.3 7 19.3 18.2 21.5 1.5.3 3 .4 4.5.4 15.1 0 25.2-11.2 25.2-22.4zm-22.8 13.2c-5.7 0-9.8-5.3-9.8-13.1 0-7.5 3.9-13.2 10-13.2 5.5 0 9.6 5.4 9.6 13.1a11.2 11.2 0 0 1-.7 3.9c-1.3 3.6-4.5 9.3-9.1 9.3z" fill="#00EDFF"/>
-            </svg>
             <h1>🏆 OFICJALNY TYPER EKIPY 🏆</h1>
         </div>
         
