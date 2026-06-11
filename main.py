@@ -14,7 +14,7 @@ mecze = [
     {"id": 6, "data": "Niedziela 03:00", "gospodarz": "Haiti 🇭🇹", "gosc": "Szkocja 🏴\u200d☠️", "wynik_g": "", "wynik_b": ""},
 ]
 
-# LISTA UCZESTNIKÓW (TERAZ JEST ICH 16 - DOPISANY TOMEK)
+# LISTA UCZESTNIKÓW (16 OSOB)
 lista_graczy = [
     "Andrzej", "Jakub", "Daniel", "Klaudia T", "Agnieszka",
     "Patrycja A", "Julia", "Marzena", "Malina", "Patrycja W",
@@ -29,7 +29,7 @@ startowe_typy = {
     "Julia": {0: (2, 1), 1: (0, 1)}, "Marzena": {0: (3, 1), 1: (0, 3)}, "Malina": {0: (3, 1), 1: (1, 2)},
     "Patrycja W": {0: (4, 0), 1: (1, 3)}, "Agata": {0: (3, 0), 1: (0, 2)}, "Marek": {0: (1, 0), 1: (2, 1)},
     "Kamil O": {0: (3, 0), 1: (1, 1)}, "Kamil K": {0: (3, 0), 1: (0, 2)}, "Michał": {0: (2, 1), 1: (1, 0)},
-    "Tomek": {0: (2, 1), 1: (1, 2)} # Dorzucone typy Tomka!
+    "Tomek": {0: (2, 1), 1: (1, 2)}
 }
 
 for gracz, m_typy in startowe_typy.items():
@@ -109,7 +109,6 @@ HTML_TEMPLATE = """
                     Hasło: <input type="password" name="pass" placeholder="Kod" style="width:70px; padding:3px;">
                     <button type="submit">Wejdź</button>
                 </form>
-                <span style="font-size:11px; display:block; color:#666; margin-top:5px;">(Kod gracza: 1234 | Twój kod Admina: admin2026)</span>
             {% endif %}
         </div>
 
