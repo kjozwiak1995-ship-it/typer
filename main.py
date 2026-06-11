@@ -1,20 +1,21 @@
 from flask import Flask, render_template_string, request, session, redirect, url_for
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
 
-# BAZA MECZÓW
+# BAZA MECZÓW (Z dodaną ukrytą godziną systemową - 'sys_data')
 mecze = [
-    {"id": 0, "data": "Czwartek 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "", "wynik_b": ""},
-    {"id": 1, "data": "Piątek 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "", "wynik_b": ""},
-    {"id": 2, "data": "Piątek 21:00", "gospodarz": "Kanada 🇨🇦", "gosc": "Bośnia i Hercegowina 🇧🇦", "wynik_g": "", "wynik_b": ""},
-    {"id": 3, "data": "Sobota 03:00", "gospodarz": "USA 🇺🇸", "gosc": "Paragwaj 🇵🇾", "wynik_g": "", "wynik_b": ""},
-    {"id": 4, "data": "Sobota 21:00", "gospodarz": "Katar 🇶🇦", "gosc": "Szwajcaria 🇨🇭", "wynik_g": "", "wynik_b": ""},
-    {"id": 5, "data": "Niedziela 00:00", "gospodarz": "Brazylia 🇧🇷", "gosc": "Maroko 🇲🇦", "wynik_g": "", "wynik_b": ""},
-    {"id": 6, "data": "Niedziela 03:00", "gospodarz": "Haiti 🇭🇹", "gosc": "Szkocja 🏴\u200d☠️", "wynik_g": "", "wynik_b": ""},
+    {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "", "wynik_b": ""},
+    {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "", "wynik_b": ""},
+    {"id": 2, "data": "Piątek 21:00", "sys_data": "2026-06-12 21:00", "gospodarz": "Kanada 🇨🇦", "gosc": "Bośnia i Hercegowina 🇧🇦", "wynik_g": "", "wynik_b": ""},
+    {"id": 3, "data": "Sobota 03:00", "sys_data": "2026-06-13 03:00", "gospodarz": "USA 🇺🇸", "gosc": "Paragwaj 🇵🇾", "wynik_g": "", "wynik_b": ""},
+    {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar 🇶🇦", "gosc": "Szwajcaria 🇨🇭", "wynik_g": "", "wynik_b": ""},
+    {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia 🇧🇷", "gosc": "Maroko 🇲🇦", "wynik_g": "", "wynik_b": ""},
+    {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti 🇭🇹", "gosc": "Szkocja 🏴\u200d☠️", "wynik_g": "", "wynik_b": ""},
 ]
 
-# LISTA UCZESTNIKÓW (16 OSOB)
+# LISTA UCZESTNIKÓW
 lista_graczy = [
     "Andrzej", "Jakub", "Daniel", "Klaudia T", "Agnieszka",
     "Patrycja A", "Julia", "Marzena", "Malina", "Patrycja W",
@@ -31,7 +32,7 @@ startowe_typy = {
     "Tomek": {0: (2, 1), 1: (1, 2)}
 }
 
-# Inicjalizacja bazy w pamięci serwera
+# INICJALIZACJA BAZY W PAMIĘCI
 typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 for gracz, m_typy in startowe_typy.items():
     for m_id, (tg, tb) in m_typy.items():
@@ -61,8 +62,6 @@ def przelicz_wszystko():
             else: pkt, kol = 0, "#FFC7CE"
             typy[g][m["id"]]["punkty"], typy[g][m["id"]]["kolor"] = pkt, kol
             totale[g] += pkt
-
-przelicz_wszystko()
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -128,9 +127,9 @@ HTML_TEMPLATE = """
         <div class="legend-box">
             <b>Zasady punktacji:</b>
             <ul>
-                <li><span class="badge badge-3">3 pkt</span> Idealnie trafiony wynik <i>(np. obstawiasz 2:1, mecz kończy się 2:1)</i></li>
-                <li><span class="badge badge-1">1 pkt</span> Trafiony zwycięzca lub remis <i>(np. obstawiasz wygraną 2:0, ale mecz kończy się 1:0)</i></li>
-                <li><span class="badge badge-0">0 pkt</span> Całkowity błąd <i>(np. obstawiasz wygraną gospodarzy, a wygrywają goście)</i></li>
+                <li><span class="badge badge-3">3 pkt</span> Idealnie trafiony wynik</li>
+                <li><span class="badge badge-1">1 pkt</span> Trafiony zwycięzca lub remis</li>
+                <li><span class="badge badge-0">0 pkt</span> Całkowity błąd</li>
             </ul>
         </div>
 
@@ -146,7 +145,10 @@ HTML_TEMPLATE = """
         <form method="POST">
             {% for m in mecze %}
             <div class="mecz-row">
-                <div class="mecz-header">⏰ {{ m.data }}</div>
+                <div class="mecz-header">
+                    ⏰ {{ m.data }} 
+                    {% if m.zablokowany %}<span style="color: #dc3545; margin-left: 10px;">🔒 ZABLOKOWANY</span>{% endif %}
+                </div>
                 <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
                     {{ m.gospodarz }} 
                     <input type="text" name="wynik_g_{{ m.id }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee;"{% endif %} style="border: 2px solid #002244; width: 40px;">
@@ -158,12 +160,13 @@ HTML_TEMPLATE = """
                 <div class="grid-typy">
                     {% for gracz in lista_graczy %}
                     {% set g_typ = typy[gracz][m.id] %}
+                    {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
                     <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
                         <span>{{ gracz }}</span>
                         <div>
-                            <input type="text" name="typ_g_{{ gracz }}_{{ m.id }}" value="{{ g_typ.typ_g }}" {% if session.get('user') != gracz and session.get('user') != 'Admin' %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            <input type="text" name="typ_g_{{ gracz }}_{{ m.id }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
                             :
-                            <input type="text" name="typ_b_{{ gracz }}_{{ m.id }}" value="{{ g_typ.typ_b }}" {% if session.get('user') != gracz and session.get('user') != 'Admin' %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            <input type="text" name="typ_b_{{ gracz }}_{{ m.id }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
                         </div>
                     </div>
                     {% endfor %}
@@ -179,7 +182,7 @@ HTML_TEMPLATE = """
         {% if session.get('user') == 'Admin' %}
         <div class="admin-backup-box">
             <h3>🔑 PANEL ADMINA: Kopia Zapasowa (Ochrona przed resetem serwera)</h3>
-            <p>Kiedy znajomi uzupełnią swoje typy na stronie, ten kod poniżej zaktualizuje się sam. Skopiuj go w całości, wejdź na GitHuba i wklej go do pliku <b>main.py</b> w miejsce starej sekcji <code>startowe_typy</code>. To zamrozi ich wyniki na stałe!</p>
+            <p>Kiedy znajomi uzupełnią swoje typy, skopiuj ten kod i wklej go do pliku <b>main.py</b> na GitHubie.</p>
             <pre>{{ backup_code }}</pre>
         </div>
         {% endif %}
@@ -191,27 +194,45 @@ HTML_TEMPLATE = """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    # 1. Sprawdzanie i zakładanie kłódek w oparciu o czas (Czas w Polsce to UTC+2 latem)
+    now_pl = datetime.utcnow() + timedelta(hours=2)
+    for m in mecze:
+        if "sys_data" in m:
+            m_time = datetime.strptime(m["sys_data"], "%Y-%m-%d %H:%M")
+            m["zablokowany"] = now_pl >= m_time
+        else:
+            m["zablokowany"] = False
+
+    # 2. Zapisywanie danych po kliknięciu "Zapisz"
     if request.method == "POST":
-        if session.get("user") == "Admin":
+        current_user = session.get("user")
+        
+        # Admin wpisuje wyniki generalne
+        if current_user == "Admin":
             for m in mecze:
                 m["wynik_g"] = request.form.get(f"wynik_g_{m.id}", m["wynik_g"])
                 m["wynik_b"] = request.form.get(f"wynik_b_{m.id}", m["wynik_b"])
         
-        current_user = session.get("user")
+        # Wpisywanie typów poszczególnych graczy
         if current_user:
             for m in mecze:
+                # ODRZUCENIE EDYCJI JEŚLI MECZ JEST ZABLOKOWANY (Gracz nie oszuka serwera)
+                if current_user != "Admin" and m["zablokowany"]:
+                    continue
+                    
                 for gracz in lista_graczy:
                     if current_user == "Admin" or current_user == gracz:
                         tg = request.form.get(f"typ_g_{gracz}_{m.id}")
                         tb = request.form.get(f"typ_b_{gracz}_{m.id}")
                         if tg is not None: typy[gracz][m["id"]]["typ_g"] = tg
                         if tb is not None: typy[gracz][m["id"]]["typ_b"] = tb
-            przelicz_wszystko()
+
+    przelicz_wszystko()
             
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
     lider = f"{totale_sorted[0][0]} ({totale_sorted[0][1]} pkt)" if totale_sorted[0][1] > 0 else "Czekamy na wyniki!"
     
-    # GENEROWANIE KODU BACKUPU NA ŻYWO DLA ADMINA
+    # GENERATOR BACKUPU
     backup_lines = ["startowe_typy = {"]
     for g in lista_graczy:
         m_list = []
@@ -221,9 +242,9 @@ def index():
             if str(tg).strip() != "" and str(tb).strip() != "":
                 m_list.append(f"{m['id']}: ({tg}, {tb})")
         m_str = ", ".join(m_list)
-        backup_lines.append(f"    \\"{g}\\": {{{m_str}}},")
+        backup_lines.append(f"    \"{g}\": {{{m_str}}},")
     backup_lines.append("}")
-    backup_code = "\\n".join(backup_lines)
+    backup_code = "\n".join(backup_lines)
 
     return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, lider=lider, backup_code=backup_code)
 
@@ -231,3 +252,14 @@ def index():
 def login():
     user = request.form.get("user_name")
     pas = request.form.get("pass")
+    if user == "Admin" and pas == "admin2026": session["user"] = "Admin"
+    elif user in lista_graczy and pas == "1234": session["user"] = user
+    return redirect(url_for("index"))
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(debug=True)
