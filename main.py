@@ -21,8 +21,7 @@ lista_graczy = [
     "Agata", "Marek", "Kamil O", "Kamil K", "Michał", "Tomek"
 ]
 
-# STARTOWE TYPY
-typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
+# STARTOWE TYPY (TUTAJ BĘDZIESZ WKLEJAĆ KOD Z ŻÓŁTEJ RAMKI)
 startowe_typy = {
     "Andrzej": {0: (3, 1), 1: (2, 1)}, "Jakub": {0: (1, 1), 1: (1, 1)}, "Daniel": {0: (2, 0), 1: (2, 1)},
     "Klaudia T": {0: (2, 1), 1: (1, 0)}, "Agnieszka": {0: (2, 0), 1: (1, 1)}, "Patrycja A": {0: (2, 0), 1: (1, 1)},
@@ -32,6 +31,8 @@ startowe_typy = {
     "Tomek": {0: (2, 1), 1: (1, 2)}
 }
 
+# Inicjalizacja bazy w pamięci serwera
+typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 for gracz, m_typy in startowe_typy.items():
     for m_id, (tg, tb) in m_typy.items():
         typy[gracz][m_id]["typ_g"] = str(tg)
@@ -67,7 +68,7 @@ HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Decathlon Typer MŚ 2026</title>
+    <title>Oficjalny Typer MŚ 2026</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 10px; color: #333; }
@@ -79,7 +80,6 @@ HTML_TEMPLATE = """
         .login-bar a { color: #00EDFF; text-decoration: none; margin-left: 10px; }
         .login-bar select, .login-bar input, .login-bar button { padding: 4px 8px; border-radius: 4px; border: none; margin: 2px; font-size: 14px; }
         .login-bar button { background: #007D8F; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .login-bar button:hover { background: #005662; }
         .legend-box { background: #e6f2f4; border-left: 5px solid #007D8F; padding: 12px 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px; color: #002244; }
         .legend-box ul { margin: 8px 0 0 20px; padding: 0; }
         .legend-box li { margin-bottom: 6px; }
@@ -89,15 +89,15 @@ HTML_TEMPLATE = """
         .badge-0 { background: #FFC7CE; color: #9C0006; border: 1px solid #e0a4aa; }
         .mecz-row { background: #ffffff; border: 1px solid #e0e6ed; padding: 15px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .mecz-header { font-weight: bold; color: #007D8F; background: #e6f2f4; padding: 6px 12px; border-radius: 6px; font-size: 14px; display: inline-block; }
-        .mecz-wynik-container { margin: 15px 0; font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 10px; color: #002244; }
         .grid-typy { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; margin-top: 15px; }
         .gracz-card { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
         input[type="text"] { width: 35px; padding: 5px; text-align: center; font-size: 14px; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; }
         .btn { background: #007D8F; color: white; padding: 14px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,125,143,0.25); }
-        .btn:hover { background: #005662; }
         .ranking-sidebar { background: #002244; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
         .ranking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 12px; font-size: 13px; }
         .ranking-item { background: rgba(255,255,255,0.07); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .admin-backup-box { background: #fff3cd; border: 2px dashed #ffc107; padding: 15px; border-radius: 12px; margin-top: 30px; color: #856404; }
+        .admin-backup-box pre { background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #ced4da; overflow-x: auto; color: #333; font-size: 11px; font-family: monospace; max-height: 250px; }
     </style>
 </head>
 <body>
@@ -175,6 +175,15 @@ HTML_TEMPLATE = """
             <button type="submit" class="btn">🚀 ZAPISZ MOJE ZMIANY / WYNIKI</button>
             {% endif %}
         </form>
+
+        {% if session.get('user') == 'Admin' %}
+        <div class="admin-backup-box">
+            <h3>🔑 PANEL ADMINA: Kopia Zapasowa (Ochrona przed resetem serwera)</h3>
+            <p>Kiedy znajomi uzupełnią swoje typy na stronie, ten kod poniżej zaktualizuje się sam. Skopiuj go w całości, wejdź na GitHuba i wklej go do pliku <b>main.py</b> w miejsce starej sekcji <code>startowe_typy</code>. To zamrozi ich wyniki na stałe!</p>
+            <pre>{{ backup_code }}</pre>
+        </div>
+        {% endif %}
+
     </div>
 </body>
 </html>
@@ -201,20 +210,24 @@ def index():
             
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
     lider = f"{totale_sorted[0][0]} ({totale_sorted[0][1]} pkt)" if totale_sorted[0][1] > 0 else "Czekamy na wyniki!"
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, lider=lider)
+    
+    # GENEROWANIE KODU BACKUPU NA ŻYWO DLA ADMINA
+    backup_lines = ["startowe_typy = {"]
+    for g in lista_graczy:
+        m_list = []
+        for m in mecze:
+            tg = typy[g][m["id"]]["typ_g"]
+            tb = typy[g][m["id"]]["typ_b"]
+            if str(tg).strip() != "" and str(tb).strip() != "":
+                m_list.append(f"{m['id']}: ({tg}, {tb})")
+        m_str = ", ".join(m_list)
+        backup_lines.append(f"    \\"{g}\\": {{{m_str}}},")
+    backup_lines.append("}")
+    backup_code = "\\n".join(backup_lines)
+
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, lider=lider, backup_code=backup_code)
 
 @app.route("/login", methods=["POST"])
 def login():
     user = request.form.get("user_name")
     pas = request.form.get("pass")
-    if user == "Admin" and pas == "admin2026": session["user"] = "Admin"
-    elif user in lista_graczy and pas == "1234": session["user"] = user
-    return redirect(url_for("index"))
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("index"))
-
-if __name__ == "__main__":
-    app.run(debug=True)
