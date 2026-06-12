@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
 
-# BAZA MECZÓW (Z WPROWADZONYMI OFICJALNYMI WYNIKAMI DLA MECZU 0 i 1)
+# BAZA MECZÓW
 mecze = [
     {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "2", "wynik_b": "0"},
     {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "2", "wynik_b": "1"},
@@ -41,7 +41,6 @@ for gracz, m_typy in startowe_typy.items():
 
 totale = {gracz: 0 for gracz in lista_graczy}
 
-# PANCERNE PRZELICZANIE
 def przelicz_wszystko():
     for g in lista_graczy: totale[g] = 0
     for m in mecze:
@@ -96,19 +95,19 @@ HTML_TEMPLATE = """
         .badge-1 { background: #FFEB9C; color: #9C6500; border: 1px solid #e0c870; }
         .badge-0 { background: #FFC7CE; color: #9C0006; border: 1px solid #e0a4aa; }
         
-        /* STYLIZACJA PODIUM DLA TOP 3 */
-        .podium-wrap { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 25px; text-align: center; color: white; font-weight: bold; }
-        .podium-block { width: 31%; border-radius: 12px 12px 0 0; border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; position: relative; }
-        .p-name { font-size: 14px; margin: 5px 0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .p-pts { color: #00EDFF; font-size: 18px; font-weight: 800; display: block; }
+        /* ELASTYCZNE PODIUM */
+        .podium-wrap { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 25px; text-align: center; color: white; font-weight: bold; }
+        .podium-block { width: 32%; border-radius: 12px 12px 0 0; border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; position: relative; }
+        .p-name { font-size: 13px; margin: 5px 0; display: block; white-space: normal; word-wrap: break-word; line-height: 1.3; }
+        .p-pts { color: #00EDFF; font-size: 18px; font-weight: 800; display: block; margin-top: 5px;}
         
-        .p-1 { height: 140px; background: linear-gradient(180deg, #FFD700, #007D8F); border-top: 5px solid #FFD700; box-shadow: 0 -4px 15px rgba(255,215,0,0.3); order: 2;}
+        .p-1 { min-height: 140px; background: linear-gradient(180deg, #FFD700, #007D8F); border-top: 5px solid #FFD700; box-shadow: 0 -4px 15px rgba(255,215,0,0.3); order: 2;}
         .p-1 .p-rank { font-size: 30px; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); }
         
-        .p-2 { height: 110px; background: linear-gradient(180deg, #C0C0C0, #002244); border-top: 5px solid #C0C0C0; order: 1;}
+        .p-2 { min-height: 110px; background: linear-gradient(180deg, #C0C0C0, #002244); border-top: 5px solid #C0C0C0; order: 1;}
         .p-2 .p-rank { font-size: 24px; color: #C0C0C0; }
         
-        .p-3 { height: 90px; background: linear-gradient(180deg, #CD7F32, #002244); border-top: 5px solid #CD7F32; order: 3;}
+        .p-3 { min-height: 90px; background: linear-gradient(180deg, #CD7F32, #002244); border-top: 5px solid #CD7F32; order: 3;}
         .p-3 .p-rank { font-size: 22px; color: #CD7F32; }
 
         .ranking-sidebar { background: #002244; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
@@ -170,23 +169,23 @@ HTML_TEMPLATE = """
                 <div class="podium-block p-2">
                     <div class="p-rank">2</div>
                     <span class="p-name">{{ podium[1][0] }}</span>
-                    <span class="p-pts">{{ podium[1][1] }} pkt</span>
+                    <span class="p-pts">{% if podium[1][1] > 0 %}{{ podium[1][1] }} pkt{% endif %}</span>
                 </div>
                 <div class="podium-block p-1">
                     <div class="p-rank">👑</div>
                     <span class="p-name">{{ podium[0][0] }}</span>
-                    <span class="p-pts">{{ podium[0][1] }} pkt</span>
+                    <span class="p-pts">{% if podium[0][1] > 0 %}{{ podium[0][1] }} pkt{% endif %}</span>
                 </div>
                 <div class="podium-block p-3">
                     <div class="p-rank">3</div>
                     <span class="p-name">{{ podium[2][0] }}</span>
-                    <span class="p-pts">{{ podium[2][1] }} pkt</span>
+                    <span class="p-pts">{% if podium[2][1] > 0 %}{{ podium[2][1] }} pkt{% endif %}</span>
                 </div>
             </div>
 
             <div class="ranking-grid">
-                {% for gracz, pkt in totale_sorted %}
-                <div class="ranking-item"><b>{{ loop.index }}. {{ gracz }}</b><br><span style="color:#00EDFF; font-size:16px;">{{ pkt }} pkt</span></div>
+                {% for miejsce, gracz, pkt in ranking %}
+                <div class="ranking-item"><b>{{ miejsce }}. {{ gracz }}</b><br><span style="color:#00EDFF; font-size:16px;">{{ pkt }} pkt</span></div>
                 {% endfor %}
             </div>
         </div>
@@ -276,16 +275,27 @@ def index():
 
     przelicz_wszystko()
             
+    # SORTOWANIE
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
     
-    # Przygotowanie danych dla podium (pobierz top 3)
-    # Jeśli turniej startuje, a wszyscy mają 0 pkt, podium też się wyświetli z pustymi nazwami
-    default_p = [("", 0), ("", 0), ("", 0)]
-    podium_data = default_p
-    if totale_sorted:
-        podium_data = totale_sorted[:3]
-        while len(podium_data) < 3: # Obsługa sytuacji, gdyby grało mniej niż 3 osoby
-            podium_data.append(("", 0))
+    # ALGORYTM EX AEQUO DLA TABELI
+    ranking_z_miejscami = []
+    aktualne_miejsce = 1
+    for i, (g, p) in enumerate(totale_sorted):
+        if i > 0 and p < totale_sorted[i-1][1]:
+            aktualne_miejsce = i + 1
+        ranking_z_miejscami.append((aktualne_miejsce, g, p))
+        
+    # ALGORYTM GRUPOWANIA PUNKTÓW DLA PODIUM
+    punkty_dodatnie = sorted(list(set([p for p in totale.values() if p > 0])), reverse=True)
+    podium_data = []
+    for i in range(3):
+        if i < len(punkty_dodatnie):
+            pkt = punkty_dodatnie[i]
+            gracze = [g for g, p in totale.items() if p == pkt]
+            podium_data.append((", ".join(gracze), pkt))
+        else:
+            podium_data.append(("---", 0))
     
     backup_lines = ["startowe_typy = {"]
     for g in lista_graczy:
@@ -300,7 +310,7 @@ def index():
     backup_lines.append("}")
     backup_code = "\n".join(backup_lines)
 
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, podium=podium_data, backup_code=backup_code, wiadomosc=wiadomosc)
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking_z_miejscami, podium=podium_data, backup_code=backup_code, wiadomosc=wiadomosc)
 
 @app.route("/login", methods=["POST"])
 def login():
