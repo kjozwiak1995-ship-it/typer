@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
 
-# BAZA MECZÓW (Z WPROWADZONYMI OFICJALNYMI WYNIKAMI)
+# BAZA MECZÓW (Z WPROWADZONYMI OFICJALNYMI WYNIKAMI DLA MECZU 0 i 1)
 mecze = [
     {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "2", "wynik_b": "0"},
     {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "2", "wynik_b": "1"},
@@ -76,15 +76,14 @@ HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Oficjalny Typer MŚ 2026</title>
+    <title>Decathlon Typer MŚ 2026</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 10px; color: #333; }
         .container { max-width: 1000px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); margin: 0 auto; }
-        .logo-wrapper { text-align: center; margin-bottom: 20px; padding-top: 10px; }
+        .logo-wrapper { text-align: center; margin-bottom: 25px; padding-top: 10px; }
         h1 { color: #002244; text-align: center; font-size: 24px; margin-top: 5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
         .alert-success { background-color: #d4edda; color: #155724; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-weight: bold; font-size: 16px; box-shadow: 0 2px 10px rgba(40,167,69,0.1); }
-        .lider-box { background: linear-gradient(135deg, #007D8F, #005662); color: white; padding: 12px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,125,143,0.2); }
         .login-bar { background: #002244; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; }
         .login-bar a { color: #00EDFF; text-decoration: none; margin-left: 10px; }
         .login-bar select, .login-bar input, .login-bar button { padding: 4px 8px; border-radius: 4px; border: none; margin: 2px; font-size: 14px; }
@@ -96,24 +95,41 @@ HTML_TEMPLATE = """
         .badge-3 { background: #C6EFCE; color: #006100; border: 1px solid #a3d9a5; }
         .badge-1 { background: #FFEB9C; color: #9C6500; border: 1px solid #e0c870; }
         .badge-0 { background: #FFC7CE; color: #9C0006; border: 1px solid #e0a4aa; }
+        
+        /* STYLIZACJA PODIUM DLA TOP 3 */
+        .podium-wrap { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 25px; text-align: center; color: white; font-weight: bold; }
+        .podium-block { width: 31%; border-radius: 12px 12px 0 0; border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; position: relative; }
+        .p-name { font-size: 14px; margin: 5px 0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .p-pts { color: #00EDFF; font-size: 18px; font-weight: 800; display: block; }
+        
+        .p-1 { height: 140px; background: linear-gradient(180deg, #FFD700, #007D8F); border-top: 5px solid #FFD700; box-shadow: 0 -4px 15px rgba(255,215,0,0.3); order: 2;}
+        .p-1 .p-rank { font-size: 30px; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); }
+        
+        .p-2 { height: 110px; background: linear-gradient(180deg, #C0C0C0, #002244); border-top: 5px solid #C0C0C0; order: 1;}
+        .p-2 .p-rank { font-size: 24px; color: #C0C0C0; }
+        
+        .p-3 { height: 90px; background: linear-gradient(180deg, #CD7F32, #002244); border-top: 5px solid #CD7F32; order: 3;}
+        .p-3 .p-rank { font-size: 22px; color: #CD7F32; }
+
+        .ranking-sidebar { background: #002244; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
+        .ranking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 12px; font-size: 13px; }
+        .ranking-item { background: rgba(255,255,255,0.07); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        
         .mecz-row { background: #ffffff; border: 1px solid #e0e6ed; padding: 15px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .mecz-header { font-weight: bold; color: #007D8F; background: #e6f2f4; padding: 6px 12px; border-radius: 6px; font-size: 14px; display: inline-block; }
         .grid-typy { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; margin-top: 15px; }
         .gracz-card { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
         input[type="text"] { width: 35px; padding: 5px; text-align: center; font-size: 14px; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; }
         .btn { background: #007D8F; color: white; padding: 14px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,125,143,0.25); }
-        .ranking-sidebar { background: #002244; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
-        .ranking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 12px; font-size: 13px; }
-        .ranking-item { background: rgba(255,255,255,0.07); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .admin-backup-box { background: #fff3cd; border: 2px dashed #ffc107; padding: 15px; border-radius: 12px; margin-top: 30px; color: #856404; }
-        .admin-backup-box pre { background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #ced4da; overflow-x: auto; color: #333; font-size: 11px; font-family: monospace; max-height: 250px; }
+        .admin-backup-box { background: #fff3cd; border: 2px dashed #ffc107; padding: 15px; border-radius: 12px; margin-top: 30px; color: #856404; font-size: 12px; }
+        .admin-backup-box pre { background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #ced4da; overflow-x: auto; color: #333; font-family: monospace; max-height: 150px; }
     </style>
 </head>
 <body>
     <div class="container">
         
         <div class="logo-wrapper">
-            <h1>🏆 OFICJALNY TYPER EKIPY 🏆</h1>
+            <h1>🏆 TYPER EKIPY 🏆</h1>
         </div>
 
         {% if wiadomosc %}
@@ -127,18 +143,16 @@ HTML_TEMPLATE = """
                 Zalogowany: <span style="color:#00EDFF; font-size:18px;">{{ session['user'] }}</span> | <a href="/logout">Wyloguj się</a>
             {% else %}
                 <form action="/login" method="POST" style="display:inline;">
-                    Strefa Gracza: 
+                    Gracz: 
                     <select name="user_name">
-                        <option value="Admin">Panel Admina</option>
+                        <option value="Admin">--- ADMIN ---</option>
                         {% for g in lista_graczy %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
                     </select>
-                    Kod dostępu: <input type="password" name="pass" placeholder="****" style="width:70px;">
+                    Kod: <input type="password" name="pass" placeholder="****" style="width:50px;">
                     <button type="submit">Wejdź</button>
                 </form>
             {% endif %}
         </div>
-
-        <div class="lider-box">👑 AKTUALNY LIDER: {{ lider }}</div>
 
         <div class="legend-box">
             <b>Zasady punktacji:</b>
@@ -150,7 +164,26 @@ HTML_TEMPLATE = """
         </div>
 
         <div class="ranking-sidebar">
-            <div style="font-weight: bold; text-align: center; letter-spacing: 1px;">📊 OFICJALNA TABELA GENERALNA</div>
+            <div style="font-weight: bold; text-align: center; letter-spacing: 1px;">📊 OFICJALNY RANKING</div>
+            
+            <div class="podium-wrap">
+                <div class="podium-block p-2">
+                    <div class="p-rank">2</div>
+                    <span class="p-name">{{ podium[1][0] }}</span>
+                    <span class="p-pts">{{ podium[1][1] }} pkt</span>
+                </div>
+                <div class="podium-block p-1">
+                    <div class="p-rank">👑</div>
+                    <span class="p-name">{{ podium[0][0] }}</span>
+                    <span class="p-pts">{{ podium[0][1] }} pkt</span>
+                </div>
+                <div class="podium-block p-3">
+                    <div class="p-rank">3</div>
+                    <span class="p-name">{{ podium[2][0] }}</span>
+                    <span class="p-pts">{{ podium[2][1] }} pkt</span>
+                </div>
+            </div>
+
             <div class="ranking-grid">
                 {% for gracz, pkt in totale_sorted %}
                 <div class="ranking-item"><b>{{ loop.index }}. {{ gracz }}</b><br><span style="color:#00EDFF; font-size:16px;">{{ pkt }} pkt</span></div>
@@ -167,22 +200,22 @@ HTML_TEMPLATE = """
                 </div>
                 <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
                     {{ m.gospodarz }} 
-                    <input type="text" name="wynik_g_{{ m.id }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                    <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
                     :
-                    <input type="text" name="wynik_b_{{ m.id }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                    <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
                     {{ m.gosc }}
                 </div>
                 
                 <div class="grid-typy">
                     {% for gracz in lista_graczy %}
-                    {% set g_typ = typy[gracz][m.id] %}
+                    {% set g_typ = typy[gracz][m['id']] %}
                     {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
                     <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
                         <span>{{ gracz }}</span>
                         <div>
-                            <input type="text" name="typ_g_{{ gracz }}_{{ m.id }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
                             :
-                            <input type="text" name="typ_b_{{ gracz }}_{{ m.id }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
                         </div>
                     </div>
                     {% endfor %}
@@ -198,7 +231,7 @@ HTML_TEMPLATE = """
         {% if session.get('user') == 'Admin' %}
         <div class="admin-backup-box">
             <h3>🔑 PANEL ADMINA: Kopia Zapasowa (Ochrona przed resetem serwera)</h3>
-            <p>Kiedy znajomi uzupełnią swoje typy, skopiuj ten kod i wklej go do pliku <b>main.py</b> na GitHubie.</p>
+            <p>Skopiuj ten kod i wklej go do pliku <b>main.py</b> na GitHubie, aby zamrozić wyniki na stałe.</p>
             <pre>{{ backup_code }}</pre>
         </div>
         {% endif %}
@@ -244,7 +277,15 @@ def index():
     przelicz_wszystko()
             
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
-    lider = f"{totale_sorted[0][0]} ({totale_sorted[0][1]} pkt)" if totale_sorted[0][1] > 0 else "Czekamy na wyniki!"
+    
+    # Przygotowanie danych dla podium (pobierz top 3)
+    # Jeśli turniej startuje, a wszyscy mają 0 pkt, podium też się wyświetli z pustymi nazwami
+    default_p = [("", 0), ("", 0), ("", 0)]
+    podium_data = default_p
+    if totale_sorted:
+        podium_data = totale_sorted[:3]
+        while len(podium_data) < 3: # Obsługa sytuacji, gdyby grało mniej niż 3 osoby
+            podium_data.append(("", 0))
     
     backup_lines = ["startowe_typy = {"]
     for g in lista_graczy:
@@ -259,7 +300,7 @@ def index():
     backup_lines.append("}")
     backup_code = "\n".join(backup_lines)
 
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, lider=lider, backup_code=backup_code, wiadomosc=wiadomosc)
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, podium=podium_data, backup_code=backup_code, wiadomosc=wiadomosc)
 
 @app.route("/login", methods=["POST"])
 def login():
