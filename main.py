@@ -226,8 +226,8 @@ def index():
         current_user = session.get("user")
         if current_user == "Admin":
             for m in mecze:
-                m["wynik_g"] = request.form.get(f"wynik_g_{m.id}", m["wynik_g"])
-                m["wynik_b"] = request.form.get(f"wynik_b_{m.id}", m["wynik_b"])
+                m["wynik_g"] = request.form.get(f"wynik_g_{m['id']}", m["wynik_g"])
+                m["wynik_b"] = request.form.get(f"wynik_b_{m['id']}", m["wynik_b"])
         
         if current_user:
             for m in mecze:
@@ -235,8 +235,8 @@ def index():
                     continue
                 for gracz in lista_graczy:
                     if current_user == "Admin" or current_user == gracz:
-                        tg = request.form.get(f"typ_g_{gracz}_{m.id}")
-                        tb = request.form.get(f"typ_b_{gracz}_{m.id}")
+                        tg = request.form.get(f"typ_g_{gracz}_{m['id']}")
+                        tb = request.form.get(f"typ_b_{gracz}_{m['id']}")
                         if tg is not None: typy[gracz][m["id"]]["typ_g"] = tg
                         if tb is not None: typy[gracz][m["id"]]["typ_b"] = tb
             wiadomosc = "✅ Pomyślnie zapisano wyniki!"
