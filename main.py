@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
 
-# BAZA MECZÓW (Z dodaną ukrytą godziną systemową - 'sys_data')
+# BAZA MECZÓW
 mecze = [
     {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "", "wynik_b": ""},
     {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "", "wynik_b": ""},
@@ -22,7 +22,7 @@ lista_graczy = [
     "Agata", "Marek", "Kamil O", "Kamil K", "Michał", "Tomek"
 ]
 
-# STARTOWE TYPY (TUTAJ BĘDZIESZ WKLEJAĆ KOD Z ŻÓŁTEJ RAMKI)
+# STARTOWE TYPY
 startowe_typy = {
     "Andrzej": {0: (3, 1), 1: (2, 1)}, "Jakub": {0: (1, 1), 1: (1, 1)}, "Daniel": {0: (2, 0), 1: (2, 1)},
     "Klaudia T": {0: (2, 1), 1: (1, 0)}, "Agnieszka": {0: (2, 0), 1: (1, 1)}, "Patrycja A": {0: (2, 0), 1: (1, 1)},
@@ -32,7 +32,7 @@ startowe_typy = {
     "Tomek": {0: (2, 1), 1: (1, 2)}
 }
 
-# INICJALIZACJA BAZY W PAMIĘCI
+# INICJALIZACJA BAZY
 typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 for gracz, m_typy in startowe_typy.items():
     for m_id, (tg, tb) in m_typy.items():
@@ -41,26 +41,37 @@ for gracz, m_typy in startowe_typy.items():
 
 totale = {gracz: 0 for gracz in lista_graczy}
 
+# PANCERNE PRZELICZANIE (Odporne na spacje, litery i puste pola)
 def przelicz_wszystko():
     for g in lista_graczy: totale[g] = 0
     for m in mecze:
-        wg_raw, wb_raw = str(m["wynik_g"]), str(m["wynik_b"])
-        if wg_raw == "" or wb_raw == "":
+        wg_raw, wb_raw = str(m["wynik_g"]).strip(), str(m["wynik_b"]).strip()
+        
+        # Ochrona przed literami i spacjami u Admina
+        if not wg_raw.isdigit() or not wb_raw.isdigit():
             for g in lista_graczy:
                 typy[g][m["id"]]["punkty"] = 0
-                typy[g][m["id"]]["kolor"] = "white" if str(typy[g][m["id"]]["typ_g"]) != "" else "#f3f4f6"
+                typy[g][m["id"]]["kolor"] = "white" if str(typy[g][m["id"]]["typ_g"]).strip() != "" else "#f3f4f6"
             continue
+            
         wg, wb = int(wg_raw), int(wb_raw)
+        
         for g in lista_graczy:
-            tg_raw, tb_raw = str(typy[g][m["id"]]["typ_g"]), str(typy[g][m["id"]]["typ_b"])
-            if tg_raw == "" or tb_raw == "":
-                typy[g][m["id"]]["punkty"], typy[g][m["id"]]["kolor"] = 0, "#FFC7CE"
+            tg_raw, tb_raw = str(typy[g][m["id"]]["typ_g"]).strip(), str(typy[g][m["id"]]["typ_b"]).strip()
+            
+            # Ochrona przed literami i spacjami u Ekipy
+            if not tg_raw.isdigit() or not tb_raw.isdigit():
+                typy[g][m["id"]]["punkty"] = 0
+                typy[g][m["id"]]["kolor"] = "#FFC7CE" if (tg_raw != "" or tb_raw != "") else "#f3f4f6"
                 continue
+                
             tg, tb = int(tg_raw), int(tb_raw)
             if tg == wg and tb == wb: pkt, kol = 3, "#C6EFCE"
             elif (tg > tb and wg > wb) or (tg < tb and wg < wb) or (tg == tb and wg == wb): pkt, kol = 1, "#FFEB9C"
             else: pkt, kol = 0, "#FFC7CE"
-            typy[g][m["id"]]["punkty"], typy[g][m["id"]]["kolor"] = pkt, kol
+            
+            typy[g][m["id"]]["punkty"] = pkt
+            typy[g][m["id"]]["kolor"] = kol
             totale[g] += pkt
 
 HTML_TEMPLATE = """
@@ -72,8 +83,9 @@ HTML_TEMPLATE = """
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 10px; color: #333; }
         .container { max-width: 1000px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); margin: 0 auto; }
-        .logo-wrapper { text-align: center; margin-bottom: 25px; padding-top: 10px; }
+        .logo-wrapper { text-align: center; margin-bottom: 20px; padding-top: 10px; }
         h1 { color: #002244; text-align: center; font-size: 24px; margin-top: 5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .alert-success { background-color: #d4edda; color: #155724; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-weight: bold; font-size: 16px; box-shadow: 0 2px 10px rgba(40,167,69,0.1); }
         .lider-box { background: linear-gradient(135deg, #007D8F, #005662); color: white; padding: 12px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,125,143,0.2); }
         .login-bar { background: #002244; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; }
         .login-bar a { color: #00EDFF; text-decoration: none; margin-left: 10px; }
@@ -105,6 +117,12 @@ HTML_TEMPLATE = """
         <div class="logo-wrapper">
             <h1>🏆 OFICJALNY TYPER EKIPY 🏆</h1>
         </div>
+
+        {% if wiadomosc %}
+        <div class="alert-success">
+            {{ wiadomosc }}
+        </div>
+        {% endif %}
         
         <div class="login-bar">
             {% if session.get('user') %}
@@ -194,7 +212,9 @@ HTML_TEMPLATE = """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # 1. Sprawdzanie i zakładanie kłódek w oparciu o czas (Czas w Polsce to UTC+2 latem)
+    wiadomosc = ""
+    
+    # 1. Kłódki czasowe
     now_pl = datetime.utcnow() + timedelta(hours=2)
     for m in mecze:
         if "sys_data" in m:
@@ -203,36 +223,31 @@ def index():
         else:
             m["zablokowany"] = False
 
-    # 2. Zapisywanie danych po kliknięciu "Zapisz"
+    # 2. Zapisywanie
     if request.method == "POST":
         current_user = session.get("user")
-        
-        # Admin wpisuje wyniki generalne
         if current_user == "Admin":
             for m in mecze:
                 m["wynik_g"] = request.form.get(f"wynik_g_{m.id}", m["wynik_g"])
                 m["wynik_b"] = request.form.get(f"wynik_b_{m.id}", m["wynik_b"])
         
-        # Wpisywanie typów poszczególnych graczy
         if current_user:
             for m in mecze:
-                # ODRZUCENIE EDYCJI JEŚLI MECZ JEST ZABLOKOWANY (Gracz nie oszuka serwera)
                 if current_user != "Admin" and m["zablokowany"]:
                     continue
-                    
                 for gracz in lista_graczy:
                     if current_user == "Admin" or current_user == gracz:
                         tg = request.form.get(f"typ_g_{gracz}_{m.id}")
                         tb = request.form.get(f"typ_b_{gracz}_{m.id}")
                         if tg is not None: typy[gracz][m["id"]]["typ_g"] = tg
                         if tb is not None: typy[gracz][m["id"]]["typ_b"] = tb
+            wiadomosc = "✅ Pomyślnie zapisano wyniki!"
 
     przelicz_wszystko()
             
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
     lider = f"{totale_sorted[0][0]} ({totale_sorted[0][1]} pkt)" if totale_sorted[0][1] > 0 else "Czekamy na wyniki!"
     
-    # GENERATOR BACKUPU
     backup_lines = ["startowe_typy = {"]
     for g in lista_graczy:
         m_list = []
@@ -246,7 +261,7 @@ def index():
     backup_lines.append("}")
     backup_code = "\n".join(backup_lines)
 
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, lider=lider, backup_code=backup_code)
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, totale_sorted=totale_sorted, lider=lider, backup_code=backup_code, wiadomosc=wiadomosc)
 
 @app.route("/login", methods=["POST"])
 def login():
