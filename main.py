@@ -278,12 +278,12 @@ def index():
     # SORTOWANIE
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
     
-    # ALGORYTM EX AEQUO DLA TABELI
+    # WERSJA 2 (LUZACKA) - NUMEROWANIE PO KOLEI BEZ OMIJANIA MIEJSC
     ranking_z_miejscami = []
     aktualne_miejsce = 1
     for i, (g, p) in enumerate(totale_sorted):
         if i > 0 and p < totale_sorted[i-1][1]:
-            aktualne_miejsce = i + 1
+            aktualne_miejsce += 1  # <- TUTAJ ZMIANA: Zawsze dodaje 1 zamiast omijać numery
         ranking_z_miejscami.append((aktualne_miejsce, g, p))
         
     # ALGORYTM GRUPOWANIA PUNKTÓW DLA PODIUM
