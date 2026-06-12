@@ -1,8 +1,19 @@
+import os
+import requests
 from flask import Flask, render_template_string, request, session, redirect, url_for
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
+
+# KREDENCJAŁY BAZY DANYCH JSONBIN
+BIN_ID = "6a2bc4f8da38895dfeb38af7"
+API_KEY = "$2a$10$VyqGJb1B1B6JJTNmndInGetz3wNmPkBpM//mfUyDdAvf3wsGhH0jW"
+JSONBIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
+HEADERS = {
+    "Content-Type": "application/json",
+    "X-Master-Key": API_KEY
+}
 
 # BAZA MECZÓW
 mecze = [
@@ -22,7 +33,7 @@ lista_graczy = [
     "Agata", "Marek", "Kamil O", "Kamil K", "Michał", "Tomek"
 ]
 
-# STARTOWE TYPY
+# STARTOWE TYPY (Tylko awaryjnie)
 startowe_typy = {
     "Andrzej": {0: (3, 1), 1: (2, 1)}, "Jakub": {0: (1, 1), 1: (1, 1)}, "Daniel": {0: (2, 0), 1: (2, 1)},
     "Klaudia T": {0: (2, 1), 1: (1, 0)}, "Agnieszka": {0: (2, 0), 1: (1, 1)}, "Patrycja A": {0: (2, 0), 1: (1, 1)},
@@ -32,7 +43,7 @@ startowe_typy = {
     "Tomek": {0: (2, 1), 1: (1, 2)}
 }
 
-# INICJALIZACJA BAZY
+# INICJALIZACJA BAZY LOKALNEJ
 typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 for gracz, m_typy in startowe_typy.items():
     for m_id, (tg, tb) in m_typy.items():
@@ -40,6 +51,55 @@ for gracz, m_typy in startowe_typy.items():
         typy[gracz][m_id]["typ_b"] = str(tb)
 
 totale = {gracz: 0 for gracz in lista_graczy}
+
+# ----------------- SYSTEM BAZY DANYCH -----------------
+def wczytaj_dane():
+    """Pobiera dane z chmury JSONBin podczas wybudzania serwera"""
+    try:
+        response = requests.get(JSONBIN_URL, headers=HEADERS)
+        if response.status_code == 200:
+            dane = response.json().get("record", {})
+            if dane.get("status") == "start":
+                return # Baza jest nowa i pusta
+            
+            # Wczytaj wyniki zawodników
+            if "typy" in dane:
+                for gracz in lista_graczy:
+                    if gracz in dane["typy"]:
+                        for m in mecze:
+                            m_str = str(m["id"])
+                            if m_str in dane["typy"][gracz]:
+                                typy[gracz][m["id"]]["typ_g"] = str(dane["typy"][gracz][m_str].get("typ_g", ""))
+                                typy[gracz][m["id"]]["typ_b"] = str(dane["typy"][gracz][m_str].get("typ_b", ""))
+            
+            # Wczytaj oficjalne wyniki meczów
+            if "mecze_wyniki" in dane:
+                for m in mecze:
+                    m_str = str(m["id"])
+                    if m_str in dane["mecze_wyniki"]:
+                        m["wynik_g"] = str(dane["mecze_wyniki"][m_str].get("wynik_g", ""))
+                        m["wynik_b"] = str(dane["mecze_wyniki"][m_str].get("wynik_b", ""))
+    except Exception as e:
+        print("Błąd pobierania danych:", e)
+
+def zapisz_dane():
+    """Wysyła najświeższe dane do chmury JSONBin po każdym kliknięciu 'Zapisz'"""
+    typy_do_zapisu = {gracz: {str(m_id): data for m_id, data in m_dict.items()} for gracz, m_dict in typy.items()}
+    mecze_do_zapisu = {str(m["id"]): {"wynik_g": m["wynik_g"], "wynik_b": m["wynik_b"]} for m in mecze}
+    
+    dane = {
+        "typy": typy_do_zapisu,
+        "mecze_wyniki": mecze_do_zapisu
+    }
+    try:
+        requests.put(JSONBIN_URL, json=dane, headers=HEADERS)
+    except Exception as e:
+        print("Błąd zapisu danych:", e)
+
+# WCZYTAJ DANE PRZY STARCIE SERWERA
+wczytaj_dane()
+
+# ------------------------------------------------------
 
 def przelicz_wszystko():
     for g in lista_graczy: totale[g] = 0
@@ -95,18 +155,14 @@ HTML_TEMPLATE = """
         .badge-1 { background: #FFEB9C; color: #9C6500; border: 1px solid #e0c870; }
         .badge-0 { background: #FFC7CE; color: #9C0006; border: 1px solid #e0a4aa; }
         
-        /* ELASTYCZNE PODIUM */
         .podium-wrap { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 25px; text-align: center; color: white; font-weight: bold; }
         .podium-block { width: 32%; border-radius: 12px 12px 0 0; border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; position: relative; }
         .p-name { font-size: 13px; margin: 5px 0; display: block; white-space: normal; word-wrap: break-word; line-height: 1.3; }
         .p-pts { color: #00EDFF; font-size: 18px; font-weight: 800; display: block; margin-top: 5px;}
-        
         .p-1 { min-height: 140px; background: linear-gradient(180deg, #FFD700, #007D8F); border-top: 5px solid #FFD700; box-shadow: 0 -4px 15px rgba(255,215,0,0.3); order: 2;}
         .p-1 .p-rank { font-size: 30px; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); }
-        
         .p-2 { min-height: 110px; background: linear-gradient(180deg, #C0C0C0, #002244); border-top: 5px solid #C0C0C0; order: 1;}
         .p-2 .p-rank { font-size: 24px; color: #C0C0C0; }
-        
         .p-3 { min-height: 90px; background: linear-gradient(180deg, #CD7F32, #002244); border-top: 5px solid #CD7F32; order: 3;}
         .p-3 .p-rank { font-size: 22px; color: #CD7F32; }
 
@@ -120,8 +176,6 @@ HTML_TEMPLATE = """
         .gracz-card { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
         input[type="text"] { width: 35px; padding: 5px; text-align: center; font-size: 14px; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; }
         .btn { background: #007D8F; color: white; padding: 14px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,125,143,0.25); }
-        .admin-backup-box { background: #fff3cd; border: 2px dashed #ffc107; padding: 15px; border-radius: 12px; margin-top: 30px; color: #856404; font-size: 12px; }
-        .admin-backup-box pre { background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #ced4da; overflow-x: auto; color: #333; font-family: monospace; max-height: 150px; }
     </style>
 </head>
 <body>
@@ -227,14 +281,6 @@ HTML_TEMPLATE = """
             {% endif %}
         </form>
 
-        {% if session.get('user') == 'Admin' %}
-        <div class="admin-backup-box">
-            <h3>🔑 PANEL ADMINA: Kopia Zapasowa (Ochrona przed resetem serwera)</h3>
-            <p>Skopiuj ten kod i wklej go do pliku <b>main.py</b> na GitHubie, aby zamrozić wyniki na stałe.</p>
-            <pre>{{ backup_code }}</pre>
-        </div>
-        {% endif %}
-
     </div>
 </body>
 </html>
@@ -253,13 +299,20 @@ def index():
         else:
             m["zablokowany"] = False
 
-    # 2. Zapisywanie
+    # 2. Zapisywanie z frontendu
     if request.method == "POST":
         current_user = session.get("user")
+        zmiana = False
+        
         if current_user == "Admin":
             for m in mecze:
-                m["wynik_g"] = request.form.get(f"wynik_g_{m['id']}", m["wynik_g"])
-                m["wynik_b"] = request.form.get(f"wynik_b_{m['id']}", m["wynik_b"])
+                nowy_g = request.form.get(f"wynik_g_{m['id']}")
+                nowy_b = request.form.get(f"wynik_b_{m['id']}")
+                if nowy_g is not None and nowy_b is not None:
+                    if m["wynik_g"] != nowy_g or m["wynik_b"] != nowy_b:
+                        m["wynik_g"] = nowy_g
+                        m["wynik_b"] = nowy_b
+                        zmiana = True
         
         if current_user:
             for m in mecze:
@@ -269,8 +322,14 @@ def index():
                     if current_user == "Admin" or current_user == gracz:
                         tg = request.form.get(f"typ_g_{gracz}_{m['id']}")
                         tb = request.form.get(f"typ_b_{gracz}_{m['id']}")
-                        if tg is not None: typy[gracz][m["id"]]["typ_g"] = tg
-                        if tb is not None: typy[gracz][m["id"]]["typ_b"] = tb
+                        if tg is not None and tb is not None:
+                            if typy[gracz][m["id"]]["typ_g"] != tg or typy[gracz][m["id"]]["typ_b"] != tb:
+                                typy[gracz][m["id"]]["typ_g"] = tg
+                                typy[gracz][m["id"]]["typ_b"] = tb
+                                zmiana = True
+                                
+        if zmiana:
+            zapisz_dane() # ZAPISZ DO CHMURY
             wiadomosc = "✅ Pomyślnie zapisano wyniki!"
 
     przelicz_wszystko()
@@ -278,15 +337,15 @@ def index():
     # SORTOWANIE
     totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
     
-    # WERSJA 2 (LUZACKA) - NUMEROWANIE PO KOLEI BEZ OMIJANIA MIEJSC
+    # LUZACKIE NUMEROWANIE MIEJSC
     ranking_z_miejscami = []
     aktualne_miejsce = 1
     for i, (g, p) in enumerate(totale_sorted):
         if i > 0 and p < totale_sorted[i-1][1]:
-            aktualne_miejsce += 1  # <- TUTAJ ZMIANA: Zawsze dodaje 1 zamiast omijać numery
+            aktualne_miejsce += 1
         ranking_z_miejscami.append((aktualne_miejsce, g, p))
         
-    # ALGORYTM GRUPOWANIA PUNKTÓW DLA PODIUM
+    # PODIUM
     punkty_dodatnie = sorted(list(set([p for p in totale.values() if p > 0])), reverse=True)
     podium_data = []
     for i in range(3):
@@ -296,21 +355,8 @@ def index():
             podium_data.append((", ".join(gracze), pkt))
         else:
             podium_data.append(("---", 0))
-    
-    backup_lines = ["startowe_typy = {"]
-    for g in lista_graczy:
-        m_list = []
-        for m in mecze:
-            tg = typy[g][m["id"]]["typ_g"]
-            tb = typy[g][m["id"]]["typ_b"]
-            if str(tg).strip() != "" and str(tb).strip() != "":
-                m_list.append(f"{m['id']}: ({tg}, {tb})")
-        m_str = ", ".join(m_list)
-        backup_lines.append(f"    \"{g}\": {{{m_str}}},")
-    backup_lines.append("}")
-    backup_code = "\n".join(backup_lines)
 
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking_z_miejscami, podium=podium_data, backup_code=backup_code, wiadomosc=wiadomosc)
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking_z_miejscami, podium=podium_data, wiadomosc=wiadomosc)
 
 @app.route("/login", methods=["POST"])
 def login():
