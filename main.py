@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
 
-# BAZA MECZÓW
+# BAZA MECZÓW (Z WPROWADZONYMI OFICJALNYMI WYNIKAMI)
 mecze = [
-    {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "", "wynik_b": ""},
-    {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "", "wynik_b": ""},
+    {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "2", "wynik_b": "0"},
+    {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "2", "wynik_b": "1"},
     {"id": 2, "data": "Piątek 21:00", "sys_data": "2026-06-12 21:00", "gospodarz": "Kanada 🇨🇦", "gosc": "Bośnia i Hercegowina 🇧🇦", "wynik_g": "", "wynik_b": ""},
     {"id": 3, "data": "Sobota 03:00", "sys_data": "2026-06-13 03:00", "gospodarz": "USA 🇺🇸", "gosc": "Paragwaj 🇵🇾", "wynik_g": "", "wynik_b": ""},
     {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar 🇶🇦", "gosc": "Szwajcaria 🇨🇭", "wynik_g": "", "wynik_b": ""},
@@ -41,13 +41,12 @@ for gracz, m_typy in startowe_typy.items():
 
 totale = {gracz: 0 for gracz in lista_graczy}
 
-# PANCERNE PRZELICZANIE (Odporne na spacje, litery i puste pola)
+# PANCERNE PRZELICZANIE
 def przelicz_wszystko():
     for g in lista_graczy: totale[g] = 0
     for m in mecze:
         wg_raw, wb_raw = str(m["wynik_g"]).strip(), str(m["wynik_b"]).strip()
         
-        # Ochrona przed literami i spacjami u Admina
         if not wg_raw.isdigit() or not wb_raw.isdigit():
             for g in lista_graczy:
                 typy[g][m["id"]]["punkty"] = 0
@@ -59,7 +58,6 @@ def przelicz_wszystko():
         for g in lista_graczy:
             tg_raw, tb_raw = str(typy[g][m["id"]]["typ_g"]).strip(), str(typy[g][m["id"]]["typ_b"]).strip()
             
-            # Ochrona przed literami i spacjami u Ekipy
             if not tg_raw.isdigit() or not tb_raw.isdigit():
                 typy[g][m["id"]]["punkty"] = 0
                 typy[g][m["id"]]["kolor"] = "#FFC7CE" if (tg_raw != "" or tb_raw != "") else "#f3f4f6"
