@@ -228,3 +228,146 @@ HTML_TEMPLATE = """
                     <span class="p-name">{{ podium[0][0] }}</span>
                     <span class="p-pts">{% if podium[0][1] > 0 %}{{ podium[0][1] }} pkt{% endif %}</span>
                 </div>
+                <div class="podium-block p-3">
+                    <div class="p-rank">3</div>
+                    <span class="p-name">{{ podium[2][0] }}</span>
+                    <span class="p-pts">{% if podium[2][1] > 0 %}{{ podium[2][1] }} pkt{% endif %}</span>
+                </div>
+            </div>
+
+            <div class="ranking-grid">
+                {% for miejsce, gracz, pkt in ranking %}
+                <div class="ranking-item"><b>{{ miejsce }}. {{ gracz }}</b><br><span style="color:#00EDFF; font-size:16px;">{{ pkt }} pkt</span></div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <form method="POST">
+            {% for m in mecze %}
+            <div class="mecz-row">
+                <div class="mecz-header">
+                    ⏰ {{ m.data }} 
+                    {% if m.zablokowany %}<span style="color: #dc3545; margin-left: 10px;">🔒 ZABLOKOWANY</span>{% endif %}
+                </div>
+                <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
+                    {{ m.gospodarz }} 
+                    <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                    :
+                    <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                    {{ m.gosc }}
+                </div>
+                
+                <div class="grid-typy">
+                    {% for gracz in lista_graczy %}
+                    {% set g_typ = typy[gracz][m['id']] %}
+                    {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
+                    <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
+                        <span>{{ gracz }}</span>
+                        <div>
+                            <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            :
+                            <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if session.get('user') %}
+            <button type="submit" class="btn">🚀 ZAPISZ MOJE ZMIANY / WYNIKI</button>
+            {% endif %}
+        </form>
+
+    </div>
+</body>
+</html>
+"""
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    wiadomosc = ""
+    
+    # 1. Kłódki czasowe
+    now_pl = datetime.utcnow() + timedelta(hours=2)
+    for m in mecze:
+        if "sys_data" in m:
+            m_time = datetime.strptime(m["sys_data"], "%Y-%m-%d %H:%M")
+            m["zablokowany"] = now_pl >= m_time
+        else:
+            m["zablokowany"] = False
+
+    # 2. Zapisywanie z frontendu
+    if request.method == "POST":
+        current_user = session.get("user")
+        zmiana = False
+        
+        if current_user == "Admin":
+            for m in mecze:
+                nowy_g = request.form.get(f"wynik_g_{m['id']}")
+                nowy_b = request.form.get(f"wynik_b_{m['id']}")
+                if nowy_g is not None and nowy_b is not None:
+                    if m["wynik_g"] != nowy_g or m["wynik_b"] != nowy_b:
+                        m["wynik_g"] = nowy_g
+                        m["wynik_b"] = nowy_b
+                        zmiana = True
+        
+        if current_user:
+            for m in mecze:
+                if current_user != "Admin" and m["zablokowany"]:
+                    continue
+                for gracz in lista_graczy:
+                    if current_user == "Admin" or current_user == gracz:
+                        tg = request.form.get(f"typ_g_{gracz}_{m['id']}")
+                        tb = request.form.get(f"typ_b_{gracz}_{m['id']}")
+                        if tg is not None and tb is not None:
+                            if typy[gracz][m["id"]]["typ_g"] != tg or typy[gracz][m["id"]]["typ_b"] != tb:
+                                typy[gracz][m["id"]]["typ_g"] = tg
+                                typy[gracz][m["id"]]["typ_b"] = tb
+                                zmiana = True
+                                
+        if zmiana:
+            zapisz_dane() # ZAPISZ DO CHMURY
+            wiadomosc = "✅ Pomyślnie zapisano wyniki!"
+
+    przelicz_wszystko()
+            
+    # SORTOWANIE
+    totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
+    
+    # LUZACKIE NUMEROWANIE MIEJSC
+    ranking_z_miejscami = []
+    aktualne_miejsce = 1
+    for i, (g, p) in enumerate(totale_sorted):
+        if i > 0 and p < totale_sorted[i-1][1]:
+            aktualne_miejsce += 1
+        ranking_z_miejscami.append((aktualne_miejsce, g, p))
+        
+    # PODIUM
+    punkty_dodatnie = sorted(list(set([p for p in totale.values() if p > 0])), reverse=True)
+    podium_data = []
+    for i in range(3):
+        if i < len(punkty_dodatnie):
+            pkt = punkty_dodatnie[i]
+            gracze = [g for g, p in totale.items() if p == pkt]
+            podium_data.append((", ".join(gracze), pkt))
+        else:
+            podium_data.append(("---", 0))
+
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking_z_miejscami, podium=podium_data, wiadomosc=wiadomosc)
+
+@app.route("/login", methods=["POST"])
+def login():
+    user = request.form.get("user_name")
+    pas = request.form.get("pass")
+    if user == "Admin" and pas == "admin2026": session["user"] = "Admin"
+    elif user in lista_graczy and pas == "1234": session["user"] = user
+    return redirect(url_for("index"))
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(debug=True)
