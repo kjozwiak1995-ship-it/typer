@@ -15,7 +15,7 @@ HEADERS = {
     "X-Master-Key": API_KEY
 }
 
-# BAZA MECZÓW
+# BAZA MECZÓW (Rozszerzona do czwartku)
 mecze = [
     {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "2", "wynik_b": "0"},
     {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "2", "wynik_b": "1"},
@@ -24,9 +24,19 @@ mecze = [
     {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar 🇶🇦", "gosc": "Szwajcaria 🇨🇭", "wynik_g": "", "wynik_b": ""},
     {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia 🇧🇷", "gosc": "Maroko 🇲🇦", "wynik_g": "", "wynik_b": ""},
     {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti 🇭🇹", "gosc": "Szkocja 🏴\u200d☠️", "wynik_g": "", "wynik_b": ""},
+    
+    # NOWE MECZE
+    {"id": 7, "data": "Poniedziałek 15:00", "sys_data": "2026-06-15 15:00", "gospodarz": "Argentyna 🇦🇷", "gosc": "Szwecja 🇸🇪", "wynik_g": "", "wynik_b": ""},
+    {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Francja 🇫🇷", "gosc": "Nigeria 🇳🇬", "wynik_g": "", "wynik_b": ""},
+    {"id": 9, "data": "Wtorek 15:00", "sys_data": "2026-06-16 15:00", "gospodarz": "Hiszpania 🇪🇸", "gosc": "Japonia 🇯🇵", "wynik_g": "", "wynik_b": ""},
+    {"id": 10, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Anglia 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "gosc": "Kolumbia 🇨🇴", "wynik_g": "", "wynik_b": ""},
+    {"id": 11, "data": "Środa 15:00", "sys_data": "2026-06-17 15:00", "gospodarz": "Niemcy 🇩🇪", "gosc": "Chile 🇨🇱", "wynik_g": "", "wynik_b": ""},
+    {"id": 12, "data": "Środa 21:00", "sys_data": "2026-06-17 21:00", "gospodarz": "Portugalia 🇵🇹", "gosc": "Senegal 🇸🇳", "wynik_g": "", "wynik_b": ""},
+    {"id": 13, "data": "Czwartek 15:00", "sys_data": "2026-06-18 15:00", "gospodarz": "Włochy 🇮🇹", "gosc": "Urugwaj 🇺🇾", "wynik_g": "", "wynik_b": ""},
+    {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Holandia 🇳🇱", "gosc": "Australia 🇦🇺", "wynik_g": "", "wynik_b": ""}
 ]
 
-# LISTA UCZESTNIKÓW (Dodano Oliwię, Szymona i Oliwiera)
+# LISTA UCZESTNIKÓW
 lista_graczy = [
     "Andrzej", "Jakub", "Daniel", "Klaudia T", "Agnieszka",
     "Patrycja A", "Julia", "Marzena", "Malina", "Patrycja W",
@@ -34,7 +44,7 @@ lista_graczy = [
     "Oliwia", "Szymon", "Oliwier"
 ]
 
-# STARTOWE TYPY (Oliwia ma od razu dodany typ na mecz nr 3)
+# STARTOWE TYPY
 startowe_typy = {
     "Andrzej": {0: (3, 1), 1: (2, 1)}, "Jakub": {0: (1, 1), 1: (1, 1)}, "Daniel": {0: (2, 0), 1: (2, 1)},
     "Klaudia T": {0: (2, 1), 1: (1, 0)}, "Agnieszka": {0: (2, 0), 1: (1, 1)}, "Patrycja A": {0: (2, 0), 1: (1, 1)},
@@ -282,92 +292,3 @@ HTML_TEMPLATE = """
     </div>
 </body>
 </html>
-"""
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-    wiadomosc = ""
-    
-    # 1. Kłódki czasowe
-    now_pl = datetime.utcnow() + timedelta(hours=2)
-    for m in mecze:
-        if "sys_data" in m:
-            m_time = datetime.strptime(m["sys_data"], "%Y-%m-%d %H:%M")
-            m["zablokowany"] = now_pl >= m_time
-        else:
-            m["zablokowany"] = False
-
-    # 2. Zapisywanie z frontendu
-    if request.method == "POST":
-        current_user = session.get("user")
-        zmiana = False
-        
-        if current_user == "Admin":
-            for m in mecze:
-                nowy_g = request.form.get(f"wynik_g_{m['id']}")
-                nowy_b = request.form.get(f"wynik_b_{m['id']}")
-                if nowy_g is not None and nowy_b is not None:
-                    if m["wynik_g"] != nowy_g or m["wynik_b"] != nowy_b:
-                        m["wynik_g"] = nowy_g
-                        m["wynik_b"] = nowy_b
-                        zmiana = True
-        
-        if current_user:
-            for m in mecze:
-                if current_user != "Admin" and m["zablokowany"]:
-                    continue
-                for gracz in lista_graczy:
-                    if current_user == "Admin" or current_user == gracz:
-                        tg = request.form.get(f"typ_g_{gracz}_{m['id']}")
-                        tb = request.form.get(f"typ_b_{gracz}_{m['id']}")
-                        if tg is not None and tb is not None:
-                            if typy[gracz][m["id"]]["typ_g"] != tg or typy[gracz][m["id"]]["typ_b"] != tb:
-                                typy[gracz][m["id"]]["typ_g"] = tg
-                                typy[gracz][m["id"]]["typ_b"] = tb
-                                zmiana = True
-                                
-        if zmiana:
-            zapisz_dane() # ZAPISZ DO CHMURY
-            wiadomosc = "✅ Pomyślnie zapisano wyniki!"
-
-    przelicz_wszystko()
-            
-    # SORTOWANIE
-    totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
-    
-    # LUZACKIE NUMEROWANIE MIEJSC
-    ranking_z_miejscami = []
-    aktualne_miejsce = 1
-    for i, (g, p) in enumerate(totale_sorted):
-        if i > 0 and p < totale_sorted[i-1][1]:
-            aktualne_miejsce += 1
-        ranking_z_miejscami.append((aktualne_miejsce, g, p))
-        
-    # PODIUM
-    punkty_dodatnie = sorted(list(set([p for p in totale.values() if p > 0])), reverse=True)
-    podium_data = []
-    for i in range(3):
-        if i < len(punkty_dodatnie):
-            pkt = punkty_dodatnie[i]
-            gracze = [g for g, p in totale.items() if p == pkt]
-            podium_data.append((", ".join(gracze), pkt))
-        else:
-            podium_data.append(("---", 0))
-
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking_z_miejscami, podium=podium_data, wiadomosc=wiadomosc)
-
-@app.route("/login", methods=["POST"])
-def login():
-    user = request.form.get("user_name")
-    pas = request.form.get("pass")
-    if user == "Admin" and pas == "admin2026": session["user"] = "Admin"
-    elif user in lista_graczy and pas == "1234": session["user"] = user
-    return redirect(url_for("index"))
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("index"))
-
-if __name__ == "__main__":
-    app.run(debug=True)
