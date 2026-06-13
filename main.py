@@ -15,25 +15,23 @@ HEADERS = {
     "X-Master-Key": API_KEY
 }
 
-# BAZA MECZÓW (Rozszerzona do czwartku)
+# BAZA MECZÓW (Czysta, bez flag - omija blokadę GitHuba)
 mecze = [
-    {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk 🇲🇽", "gosc": "RPA 🇿🇦", "wynik_g": "2", "wynik_b": "0"},
-    {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa 🇰🇷", "gosc": "Czechy 🇨🇿", "wynik_g": "2", "wynik_b": "1"},
-    {"id": 2, "data": "Piątek 21:00", "sys_data": "2026-06-12 21:00", "gospodarz": "Kanada 🇨🇦", "gosc": "Bośnia i Hercegowina 🇧🇦", "wynik_g": "", "wynik_b": ""},
-    {"id": 3, "data": "Sobota 03:00", "sys_data": "2026-06-13 03:00", "gospodarz": "USA 🇺🇸", "gosc": "Paragwaj 🇵🇾", "wynik_g": "", "wynik_b": ""},
-    {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar 🇶🇦", "gosc": "Szwajcaria 🇨🇭", "wynik_g": "", "wynik_b": ""},
-    {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia 🇧🇷", "gosc": "Maroko 🇲🇦", "wynik_g": "", "wynik_b": ""},
-    {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti 🇭🇹", "gosc": "Szkocja 🏴\u200d☠️", "wynik_g": "", "wynik_b": ""},
-    
-    # NOWE MECZE
-    {"id": 7, "data": "Poniedziałek 15:00", "sys_data": "2026-06-15 15:00", "gospodarz": "Argentyna 🇦🇷", "gosc": "Szwecja 🇸🇪", "wynik_g": "", "wynik_b": ""},
-    {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Francja 🇫🇷", "gosc": "Nigeria 🇳🇬", "wynik_g": "", "wynik_b": ""},
-    {"id": 9, "data": "Wtorek 15:00", "sys_data": "2026-06-16 15:00", "gospodarz": "Hiszpania 🇪🇸", "gosc": "Japonia 🇯🇵", "wynik_g": "", "wynik_b": ""},
-    {"id": 10, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Anglia 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "gosc": "Kolumbia 🇨🇴", "wynik_g": "", "wynik_b": ""},
-    {"id": 11, "data": "Środa 15:00", "sys_data": "2026-06-17 15:00", "gospodarz": "Niemcy 🇩🇪", "gosc": "Chile 🇨🇱", "wynik_g": "", "wynik_b": ""},
-    {"id": 12, "data": "Środa 21:00", "sys_data": "2026-06-17 21:00", "gospodarz": "Portugalia 🇵🇹", "gosc": "Senegal 🇸🇳", "wynik_g": "", "wynik_b": ""},
-    {"id": 13, "data": "Czwartek 15:00", "sys_data": "2026-06-18 15:00", "gospodarz": "Włochy 🇮🇹", "gosc": "Urugwaj 🇺🇾", "wynik_g": "", "wynik_b": ""},
-    {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Holandia 🇳🇱", "gosc": "Australia 🇦🇺", "wynik_g": "", "wynik_b": ""}
+    {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk", "gosc": "RPA", "wynik_g": "2", "wynik_b": "0"},
+    {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa", "gosc": "Czechy", "wynik_g": "2", "wynik_b": "1"},
+    {"id": 2, "data": "Piątek 21:00", "sys_data": "2026-06-12 21:00", "gospodarz": "Kanada", "gosc": "Bośnia i Hercegowina", "wynik_g": "", "wynik_b": ""},
+    {"id": 3, "data": "Sobota 03:00", "sys_data": "2026-06-13 03:00", "gospodarz": "USA", "gosc": "Paragwaj", "wynik_g": "", "wynik_b": ""},
+    {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar", "gosc": "Szwajcaria", "wynik_g": "", "wynik_b": ""},
+    {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia", "gosc": "Maroko", "wynik_g": "", "wynik_b": ""},
+    {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti", "gosc": "Szkocja", "wynik_g": "", "wynik_b": ""},
+    {"id": 7, "data": "Poniedziałek 15:00", "sys_data": "2026-06-15 15:00", "gospodarz": "Argentyna", "gosc": "Szwecja", "wynik_g": "", "wynik_b": ""},
+    {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Francja", "gosc": "Nigeria", "wynik_g": "", "wynik_b": ""},
+    {"id": 9, "data": "Wtorek 15:00", "sys_data": "2026-06-16 15:00", "gospodarz": "Hiszpania", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
+    {"id": 10, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Anglia", "gosc": "Kolumbia", "wynik_g": "", "wynik_b": ""},
+    {"id": 11, "data": "Środa 15:00", "sys_data": "2026-06-17 15:00", "gospodarz": "Niemcy", "gosc": "Chile", "wynik_g": "", "wynik_b": ""},
+    {"id": 12, "data": "Środa 21:00", "sys_data": "2026-06-17 21:00", "gospodarz": "Portugalia", "gosc": "Senegal", "wynik_g": "", "wynik_b": ""},
+    {"id": 13, "data": "Czwartek 15:00", "sys_data": "2026-06-18 15:00", "gospodarz": "Włochy", "gosc": "Urugwaj", "wynik_g": "", "wynik_b": ""},
+    {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Holandia", "gosc": "Australia", "wynik_g": "", "wynik_b": ""}
 ]
 
 # LISTA UCZESTNIKÓW
@@ -184,6 +182,14 @@ HTML_TEMPLATE = """
         .gracz-card { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
         input[type="text"] { width: 35px; padding: 5px; text-align: center; font-size: 14px; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; }
         .btn { background: #007D8F; color: white; padding: 14px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,125,143,0.25); }
+        
+        /* CSS DLA SZUFLADY ZAKOŃCZONYCH MECZÓW */
+        .zakonczone-sekcja { background: #f8f9fa; border: 2px dashed #ced4da; border-radius: 12px; margin-bottom: 30px; }
+        .zakonczone-sekcja summary { font-weight: 800; color: #6c757d; cursor: pointer; padding: 15px; text-align: center; list-style: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; outline: none; transition: 0.2s; user-select: none; }
+        .zakonczone-sekcja summary:hover { color: #002244; background: #e9ecef; border-radius: 12px; }
+        .zakonczone-sekcja summary::-webkit-details-marker { display: none; }
+        .zakonczone-sekcja[open] summary { border-bottom: 2px dashed #ced4da; border-radius: 12px 12px 0 0; margin-bottom: 15px; background: transparent;}
+        .naglowek-sekcji { text-align: center; color: #002244; margin: 20px 0 25px 0; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -253,36 +259,90 @@ HTML_TEMPLATE = """
         </div>
 
         <form method="POST">
+            {% set ns = namespace(zablokowane=0, aktywne=0) %}
             {% for m in mecze %}
-            <div class="mecz-row">
-                <div class="mecz-header">
-                    ⏰ {{ m.data }} 
-                    {% if m.zablokowany %}<span style="color: #dc3545; margin-left: 10px;">🔒 ZABLOKOWANY</span>{% endif %}
-                </div>
-                <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
-                    {{ m.gospodarz }} 
-                    <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
-                    :
-                    <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
-                    {{ m.gosc }}
-                </div>
-                
-                <div class="grid-typy">
-                    {% for gracz in lista_graczy %}
-                    {% set g_typ = typy[gracz][m['id']] %}
-                    {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
-                    <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
-                        <span>{{ gracz }}</span>
-                        <div>
-                            <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                {% if m.zablokowany %}
+                    {% set ns.zablokowane = ns.zablokowane + 1 %}
+                {% else %}
+                    {% set ns.aktywne = ns.aktywne + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% if ns.zablokowane > 0 %}
+            <details class="zakonczone-sekcja">
+                <summary>⬇️ Rozwiń zakończone mecze ({{ ns.zablokowane }}) ⬇️</summary>
+                <div style="padding: 0 10px;">
+                {% for m in mecze %}
+                    {% if m.zablokowany %}
+                    <div class="mecz-row" style="background-color: #fcfcfc;">
+                        <div class="mecz-header">
+                            ⏰ {{ m.data }} <span style="color: #dc3545; margin-left: 10px;">🔒 ZABLOKOWANY</span>
+                        </div>
+                        <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
+                            {{ m.gospodarz }} 
+                            <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
                             :
-                            <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                            {{ m.gosc }}
+                        </div>
+                        
+                        <div class="grid-typy">
+                            {% for gracz in lista_graczy %}
+                            {% set g_typ = typy[gracz][m['id']] %}
+                            {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
+                            <div class="gracz-card" style="background-color: {{ g_typ.kolor }}; opacity: 0.85;">
+                                <span>{{ gracz }}</span>
+                                <div>
+                                    <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                                    :
+                                    <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </div>
-            </div>
+            </details>
+            {% endif %}
+
+            {% if ns.aktywne > 0 %}
+            <div class="naglowek-sekcji">🔥 MECZE DO TYPOWANIA ({{ ns.aktywne }}) 🔥</div>
+            {% for m in mecze %}
+                {% if not m.zablokowany %}
+                <div class="mecz-row">
+                    <div class="mecz-header">
+                        ⏰ {{ m.data }} 
+                    </div>
+                    <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
+                        {{ m.gospodarz }} 
+                        <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                        :
+                        <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                        {{ m.gosc }}
+                    </div>
+                    
+                    <div class="grid-typy">
+                        {% for gracz in lista_graczy %}
+                        {% set g_typ = typy[gracz][m['id']] %}
+                        {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
+                        <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
+                            <span>{{ gracz }}</span>
+                            <div>
+                                <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                                :
+                                <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             {% endfor %}
+            {% else %}
+            <div class="naglowek-sekcji">🏁 WSZYSTKIE MECZE ZAKOŃCZONE 🏁</div>
+            {% endif %}
             
             {% if session.get('user') %}
             <button type="submit" class="btn">🚀 ZAPISZ MOJE ZMIANY / WYNIKI</button>
