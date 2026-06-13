@@ -34,12 +34,12 @@ mecze = [
     {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Holandia", "gosc": "Australia", "wynik_g": "", "wynik_b": ""}
 ]
 
-# LISTA UCZESTNIKÓW
+# LISTA UCZESTNIKÓW (Dodana Patrycja C)
 lista_graczy = [
     "Andrzej", "Jakub", "Daniel", "Klaudia T", "Agnieszka",
     "Patrycja A", "Julia", "Marzena", "Malina", "Patrycja W",
     "Agata", "Marek", "Kamil O", "Kamil K", "Michał", "Tomek",
-    "Oliwia", "Szymon", "Oliwier"
+    "Oliwia", "Szymon", "Oliwier", "Patrycja C"
 ]
 
 # STARTOWE TYPY
@@ -52,7 +52,8 @@ startowe_typy = {
     "Tomek": {0: (2, 1), 1: (1, 2)},
     "Oliwia": {3: (2, 0)},
     "Szymon": {},
-    "Oliwier": {}
+    "Oliwier": {},
+    "Patrycja C": {}
 }
 
 # INICJALIZACJA BAZY LOKALNEJ
