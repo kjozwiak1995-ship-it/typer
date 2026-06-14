@@ -15,8 +15,9 @@ HEADERS = {
     "X-Master-Key": API_KEY
 }
 
-# BAZA MECZÓW (Czysta, bez flag - omija blokadę GitHuba)
+# BAZA MECZÓW (Zaktualizowana: historyczne zachowane, nowe dodane)
 mecze = [
+    # --- MECZE ZAKOŃCZONE (Zachowane, aby nie usunąć danych z bazy) ---
     {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk", "gosc": "RPA", "wynik_g": "2", "wynik_b": "0"},
     {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa", "gosc": "Czechy", "wynik_g": "2", "wynik_b": "1"},
     {"id": 2, "data": "Piątek 21:00", "sys_data": "2026-06-12 21:00", "gospodarz": "Kanada", "gosc": "Bośnia i Hercegowina", "wynik_g": "", "wynik_b": ""},
@@ -24,20 +25,35 @@ mecze = [
     {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar", "gosc": "Szwajcaria", "wynik_g": "", "wynik_b": ""},
     {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia", "gosc": "Maroko", "wynik_g": "", "wynik_b": ""},
     {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti", "gosc": "Szkocja", "wynik_g": "", "wynik_b": ""},
-    
-    # --- DZISIEJSZE MECZE (14 czerwca) ---
     {"id": 15, "data": "Niedziela 06:00", "sys_data": "2026-06-14 06:00", "gospodarz": "Australia", "gosc": "Turcja", "wynik_g": "", "wynik_b": ""},
+    
+    # --- NOWY TERMINARZ (od 14 czerwca 19:00 do 18 czerwca) ---
+    
+    # 14 czerwca
     {"id": 16, "data": "Niedziela 19:00", "sys_data": "2026-06-14 19:00", "gospodarz": "Niemcy", "gosc": "Curaçao", "wynik_g": "", "wynik_b": ""},
     {"id": 17, "data": "Niedziela 22:00", "sys_data": "2026-06-14 22:00", "gospodarz": "Holandia", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
-    # ----------------------------------------------
-
-    # --- ZAKTUALIZOWANE MECZE (15-18 czerwca) ---
+    
+    # 15 czerwca
+    {"id": 18, "data": "Poniedziałek 01:00", "sys_data": "2026-06-15 01:00", "gospodarz": "Wybrzeże Kości Słoniowej", "gosc": "Ekwador", "wynik_g": "", "wynik_b": ""},
+    {"id": 19, "data": "Poniedziałek 04:00", "sys_data": "2026-06-15 04:00", "gospodarz": "Szwecja", "gosc": "Tunezja", "wynik_g": "", "wynik_b": ""},
     {"id": 7, "data": "Poniedziałek 18:00", "sys_data": "2026-06-15 18:00", "gospodarz": "Hiszpania", "gosc": "Republika Zielonego Przylądka", "wynik_g": "", "wynik_b": ""},
     {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Belgia", "gosc": "Egipt", "wynik_g": "", "wynik_b": ""},
+    
+    # 16 czerwca
+    {"id": 20, "data": "Wtorek 00:00", "sys_data": "2026-06-16 00:00", "gospodarz": "Arabia Saudyjska", "gosc": "Urugwaj", "wynik_g": "", "wynik_b": ""},
+    {"id": 21, "data": "Wtorek 03:00", "sys_data": "2026-06-16 03:00", "gospodarz": "Iran", "gosc": "Nowa Zelandia", "wynik_g": "", "wynik_b": ""},
     {"id": 9, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Francja", "gosc": "Senegal", "wynik_g": "", "wynik_b": ""},
+    
+    # 17 czerwca
+    {"id": 22, "data": "Środa 00:00", "sys_data": "2026-06-17 00:00", "gospodarz": "Irak", "gosc": "Norwegia", "wynik_g": "", "wynik_b": ""},
+    {"id": 23, "data": "Środa 03:00", "sys_data": "2026-06-17 03:00", "gospodarz": "Argentyna", "gosc": "Algieria", "wynik_g": "", "wynik_b": ""},
+    {"id": 24, "data": "Środa 06:00", "sys_data": "2026-06-17 06:00", "gospodarz": "Austria", "gosc": "Jordania", "wynik_g": "", "wynik_b": ""},
     {"id": 10, "data": "Środa 19:00", "sys_data": "2026-06-17 19:00", "gospodarz": "Portugalia", "gosc": "DR Konga", "wynik_g": "", "wynik_b": ""},
     {"id": 11, "data": "Środa 22:00", "sys_data": "2026-06-17 22:00", "gospodarz": "Anglia", "gosc": "Chorwacja", "wynik_g": "", "wynik_b": ""},
+    
+    # 18 czerwca
     {"id": 12, "data": "Czwartek 01:00", "sys_data": "2026-06-18 01:00", "gospodarz": "Ghana", "gosc": "Panama", "wynik_g": "", "wynik_b": ""},
+    {"id": 25, "data": "Czwartek 04:00", "sys_data": "2026-06-18 04:00", "gospodarz": "Uzbekistan", "gosc": "Kolumbia", "wynik_g": "", "wynik_b": ""},
     {"id": 13, "data": "Czwartek 18:00", "sys_data": "2026-06-18 18:00", "gospodarz": "Czechy", "gosc": "RPA", "wynik_g": "", "wynik_b": ""},
     {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Szwajcaria", "gosc": "Bośnia i Hercegowina", "wynik_g": "", "wynik_b": ""}
 ]
