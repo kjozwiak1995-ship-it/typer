@@ -31,7 +31,7 @@ mecze = [
     {"id": 17, "data": "Niedziela 22:00", "sys_data": "2026-06-14 22:00", "gospodarz": "Holandia", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
     # ----------------------------------------------
 
-   {"id": 7, "data": "Poniedziałek 18:00", "sys_data": "2026-06-15 18:00", "gospodarz": "Hiszpania", "gosc": "Republika Zielonego Przylądka", "wynik_g": "", "wynik_b": ""},
+    {"id": 7, "data": "Poniedziałek 18:00", "sys_data": "2026-06-15 18:00", "gospodarz": "Hiszpania", "gosc": "Republika Zielonego Przylądka", "wynik_g": "", "wynik_b": ""},
     {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Belgia", "gosc": "Egipt", "wynik_g": "", "wynik_b": ""},
     {"id": 9, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Francja", "gosc": "Senegal", "wynik_g": "", "wynik_b": ""},
     {"id": 10, "data": "Środa 19:00", "sys_data": "2026-06-17 19:00", "gospodarz": "Portugalia", "gosc": "DR Konga", "wynik_g": "", "wynik_b": ""},
