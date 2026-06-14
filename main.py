@@ -31,14 +31,14 @@ mecze = [
     {"id": 17, "data": "Niedziela 22:00", "sys_data": "2026-06-14 22:00", "gospodarz": "Holandia", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
     # ----------------------------------------------
 
-    {"id": 7, "data": "Poniedziałek 15:00", "sys_data": "2026-06-15 15:00", "gospodarz": "Argentyna", "gosc": "Szwecja", "wynik_g": "", "wynik_b": ""},
-    {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Francja", "gosc": "Nigeria", "wynik_g": "", "wynik_b": ""},
-    {"id": 9, "data": "Wtorek 15:00", "sys_data": "2026-06-16 15:00", "gospodarz": "Hiszpania", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
-    {"id": 10, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Anglia", "gosc": "Kolumbia", "wynik_g": "", "wynik_b": ""},
-    {"id": 11, "data": "Środa 15:00", "sys_data": "2026-06-17 15:00", "gospodarz": "Niemcy", "gosc": "Chile", "wynik_g": "", "wynik_b": ""},
-    {"id": 12, "data": "Środa 21:00", "sys_data": "2026-06-17 21:00", "gospodarz": "Portugalia", "gosc": "Senegal", "wynik_g": "", "wynik_b": ""},
-    {"id": 13, "data": "Czwartek 15:00", "sys_data": "2026-06-18 15:00", "gospodarz": "Włochy", "gosc": "Urugwaj", "wynik_g": "", "wynik_b": ""},
-    {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Holandia", "gosc": "Australia", "wynik_g": "", "wynik_b": ""}
+   {"id": 7, "data": "Poniedziałek 18:00", "sys_data": "2026-06-15 18:00", "gospodarz": "Hiszpania", "gosc": "Republika Zielonego Przylądka", "wynik_g": "", "wynik_b": ""},
+    {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Belgia", "gosc": "Egipt", "wynik_g": "", "wynik_b": ""},
+    {"id": 9, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Francja", "gosc": "Senegal", "wynik_g": "", "wynik_b": ""},
+    {"id": 10, "data": "Środa 19:00", "sys_data": "2026-06-17 19:00", "gospodarz": "Portugalia", "gosc": "DR Konga", "wynik_g": "", "wynik_b": ""},
+    {"id": 11, "data": "Środa 22:00", "sys_data": "2026-06-17 22:00", "gospodarz": "Anglia", "gosc": "Chorwacja", "wynik_g": "", "wynik_b": ""},
+    {"id": 12, "data": "Czwartek 01:00", "sys_data": "2026-06-18 01:00", "gospodarz": "Ghana", "gosc": "Panama", "wynik_g": "", "wynik_b": ""},
+    {"id": 13, "data": "Czwartek 18:00", "sys_data": "2026-06-18 18:00", "gospodarz": "Czechy", "gosc": "RPA", "wynik_g": "", "wynik_b": ""},
+    {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Szwajcaria", "gosc": "Bośnia i Hercegowina", "wynik_g": "", "wynik_b": ""}
 ]
 
 # LISTA UCZESTNIKÓW
