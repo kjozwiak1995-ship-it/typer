@@ -24,6 +24,13 @@ mecze = [
     {"id": 4, "data": "Sobota 21:00", "sys_data": "2026-06-13 21:00", "gospodarz": "Katar", "gosc": "Szwajcaria", "wynik_g": "", "wynik_b": ""},
     {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia", "gosc": "Maroko", "wynik_g": "", "wynik_b": ""},
     {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti", "gosc": "Szkocja", "wynik_g": "", "wynik_b": ""},
+    
+    # --- DODANE DZISIEJSZE MECZE (14 czerwca) ---
+    {"id": 15, "data": "Niedziela 06:00", "sys_data": "2026-06-14 06:00", "gospodarz": "Australia", "gosc": "Turcja", "wynik_g": "", "wynik_b": ""},
+    {"id": 16, "data": "Niedziela 19:00", "sys_data": "2026-06-14 19:00", "gospodarz": "Niemcy", "gosc": "Curaçao", "wynik_g": "", "wynik_b": ""},
+    {"id": 17, "data": "Niedziela 22:00", "sys_data": "2026-06-14 22:00", "gospodarz": "Holandia", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
+    # ----------------------------------------------
+
     {"id": 7, "data": "Poniedziałek 15:00", "sys_data": "2026-06-15 15:00", "gospodarz": "Argentyna", "gosc": "Szwecja", "wynik_g": "", "wynik_b": ""},
     {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Francja", "gosc": "Nigeria", "wynik_g": "", "wynik_b": ""},
     {"id": 9, "data": "Wtorek 15:00", "sys_data": "2026-06-16 15:00", "gospodarz": "Hiszpania", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
@@ -60,8 +67,9 @@ startowe_typy = {
 typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 for gracz, m_typy in startowe_typy.items():
     for m_id, (tg, tb) in m_typy.items():
-        typy[gracz][m_id]["typ_g"] = str(tg)
-        typy[gracz][m_id]["typ_b"] = str(tb)
+        if m_id in typy[gracz]:  # Zabezpieczenie na wypadek, gdyby ktoś wytypował usunięty mecz
+            typy[gracz][m_id]["typ_g"] = str(tg)
+            typy[gracz][m_id]["typ_b"] = str(tb)
 
 totale = {gracz: 0 for gracz in lista_graczy}
 
