@@ -1,4 +1,3 @@
-```python
 import os
 import requests
 from flask import Flask, render_template_string, request, session, redirect, url_for
@@ -503,5 +502,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-```
