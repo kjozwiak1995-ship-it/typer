@@ -15,9 +15,9 @@ HEADERS = {
     "X-Master-Key": API_KEY
 }
 
-# BAZA MECZÓW (Zaktualizowana: historyczne zachowane, nowe z 19-26 czerwca dodane)
+# BAZA MECZÓW (Zaktualizowana: historyczne zachowane, stare i nowe dodane)
 mecze = [
-    # --- MECZE ZAKOŃCZONE (Zachowane, aby nie usunąć danych z bazy) ---
+    # --- MECZE ZAKOŃCZONE I Z DNI 11-18 CZERWCA ---
     {"id": 0, "data": "Czwartek 21:00", "sys_data": "2026-06-11 21:00", "gospodarz": "Meksyk", "gosc": "RPA", "wynik_g": "2", "wynik_b": "0"},
     {"id": 1, "data": "Piątek 04:00", "sys_data": "2026-06-12 04:00", "gospodarz": "Korea Południowa", "gosc": "Czechy", "wynik_g": "2", "wynik_b": "1"},
     {"id": 2, "data": "Piątek 21:00", "sys_data": "2026-06-12 21:00", "gospodarz": "Kanada", "gosc": "Bośnia i Hercegowina", "wynik_g": "", "wynik_b": ""},
@@ -26,48 +26,38 @@ mecze = [
     {"id": 5, "data": "Niedziela 00:00", "sys_data": "2026-06-14 00:00", "gospodarz": "Brazylia", "gosc": "Maroko", "wynik_g": "", "wynik_b": ""},
     {"id": 6, "data": "Niedziela 03:00", "sys_data": "2026-06-14 03:00", "gospodarz": "Haiti", "gosc": "Szkocja", "wynik_g": "", "wynik_b": ""},
     {"id": 15, "data": "Niedziela 06:00", "sys_data": "2026-06-14 06:00", "gospodarz": "Australia", "gosc": "Turcja", "wynik_g": "", "wynik_b": ""},
-    
-    # 14 czerwca
     {"id": 16, "data": "Niedziela 19:00", "sys_data": "2026-06-14 19:00", "gospodarz": "Niemcy", "gosc": "Curaçao", "wynik_g": "", "wynik_b": ""},
     {"id": 17, "data": "Niedziela 22:00", "sys_data": "2026-06-14 22:00", "gospodarz": "Holandia", "gosc": "Japonia", "wynik_g": "", "wynik_b": ""},
-    
-    # 15 czerwca
     {"id": 18, "data": "Poniedziałek 01:00", "sys_data": "2026-06-15 01:00", "gospodarz": "Wybrzeże Kości Słoniowej", "gosc": "Ekwador", "wynik_g": "", "wynik_b": ""},
     {"id": 19, "data": "Poniedziałek 04:00", "sys_data": "2026-06-15 04:00", "gospodarz": "Szwecja", "gosc": "Tunezja", "wynik_g": "", "wynik_b": ""},
     {"id": 7, "data": "Poniedziałek 18:00", "sys_data": "2026-06-15 18:00", "gospodarz": "Hiszpania", "gosc": "Republika Zielonego Przylądka", "wynik_g": "", "wynik_b": ""},
     {"id": 8, "data": "Poniedziałek 21:00", "sys_data": "2026-06-15 21:00", "gospodarz": "Belgia", "gosc": "Egipt", "wynik_g": "", "wynik_b": ""},
-    
-    # 16 czerwca
     {"id": 20, "data": "Wtorek 00:00", "sys_data": "2026-06-16 00:00", "gospodarz": "Arabia Saudyjska", "gosc": "Urugwaj", "wynik_g": "", "wynik_b": ""},
     {"id": 21, "data": "Wtorek 03:00", "sys_data": "2026-06-16 03:00", "gospodarz": "Iran", "gosc": "Nowa Zelandia", "wynik_g": "", "wynik_b": ""},
     {"id": 9, "data": "Wtorek 21:00", "sys_data": "2026-06-16 21:00", "gospodarz": "Francja", "gosc": "Senegal", "wynik_g": "", "wynik_b": ""},
-    
-    # 17 czerwca
     {"id": 22, "data": "Środa 00:00", "sys_data": "2026-06-17 00:00", "gospodarz": "Irak", "gosc": "Norwegia", "wynik_g": "", "wynik_b": ""},
     {"id": 23, "data": "Środa 03:00", "sys_data": "2026-06-17 03:00", "gospodarz": "Argentyna", "gosc": "Algieria", "wynik_g": "", "wynik_b": ""},
     {"id": 24, "data": "Środa 06:00", "sys_data": "2026-06-17 06:00", "gospodarz": "Austria", "gosc": "Jordania", "wynik_g": "", "wynik_b": ""},
     {"id": 10, "data": "Środa 19:00", "sys_data": "2026-06-17 19:00", "gospodarz": "Portugalia", "gosc": "DR Konga", "wynik_g": "", "wynik_b": ""},
     {"id": 11, "data": "Środa 22:00", "sys_data": "2026-06-17 22:00", "gospodarz": "Anglia", "gosc": "Chorwacja", "wynik_g": "", "wynik_b": ""},
-    
-    # 18 czerwca
     {"id": 12, "data": "Czwartek 01:00", "sys_data": "2026-06-18 01:00", "gospodarz": "Ghana", "gosc": "Panama", "wynik_g": "", "wynik_b": ""},
     {"id": 25, "data": "Czwartek 04:00", "sys_data": "2026-06-18 04:00", "gospodarz": "Uzbekistan", "gosc": "Kolumbia", "wynik_g": "", "wynik_b": ""},
     {"id": 13, "data": "Czwartek 18:00", "sys_data": "2026-06-18 18:00", "gospodarz": "Czechy", "gosc": "RPA", "wynik_g": "", "wynik_b": ""},
     {"id": 14, "data": "Czwartek 21:00", "sys_data": "2026-06-18 21:00", "gospodarz": "Szwajcaria", "gosc": "Bośnia i Hercegowina", "wynik_g": "", "wynik_b": ""},
 
-    # --- NOWA PARTIA MECZÓW (19 - 26 Czerwca) ---
-
+    # --- NOWE MECZE (19-28 CZERWCA) ---
+    
     # 19 czerwca
     {"id": 26, "data": "Piątek 00:00", "sys_data": "2026-06-19 00:00", "gospodarz": "Kanada", "gosc": "Katar", "wynik_g": "", "wynik_b": ""},
     {"id": 27, "data": "Piątek 03:00", "sys_data": "2026-06-19 03:00", "gospodarz": "Meksyk", "gosc": "Korea Południowa", "wynik_g": "", "wynik_b": ""},
     {"id": 28, "data": "Piątek 21:00", "sys_data": "2026-06-19 21:00", "gospodarz": "USA", "gosc": "Australia", "wynik_g": "", "wynik_b": ""},
-
+    
     # 20 czerwca
     {"id": 29, "data": "Sobota 00:00", "sys_data": "2026-06-20 00:00", "gospodarz": "Szkocja", "gosc": "Maroko", "wynik_g": "", "wynik_b": ""},
     {"id": 30, "data": "Sobota 03:00", "sys_data": "2026-06-20 03:00", "gospodarz": "Brazylia", "gosc": "Haiti", "wynik_g": "", "wynik_b": ""},
     {"id": 31, "data": "Sobota 05:00", "sys_data": "2026-06-20 05:00", "gospodarz": "Turcja", "gosc": "Paragwaj", "wynik_g": "", "wynik_b": ""},
     {"id": 32, "data": "Sobota 19:00", "sys_data": "2026-06-20 19:00", "gospodarz": "Holandia", "gosc": "Szwecja", "wynik_g": "", "wynik_b": ""},
-    {"id": 33, "data": "Sobota 22:00", "sys_data": "2026-06-20 22:00", "gospodarz": "Niemcy", "gosc": "WKS", "wynik_g": "", "wynik_b": ""},
+    {"id": 33, "data": "Sobota 22:00", "sys_data": "2026-06-20 22:00", "gospodarz": "Niemcy", "gosc": "Wybrzeże Kości Słoniowej", "wynik_g": "", "wynik_b": ""},
 
     # 21 czerwca
     {"id": 34, "data": "Niedziela 02:00", "sys_data": "2026-06-21 02:00", "gospodarz": "Ekwador", "gosc": "Curaçao", "wynik_g": "", "wynik_b": ""},
@@ -98,7 +88,7 @@ mecze = [
     {"id": 51, "data": "Czwartek 00:00", "sys_data": "2026-06-25 00:00", "gospodarz": "Szkocja", "gosc": "Brazylia", "wynik_g": "", "wynik_b": ""},
     {"id": 52, "data": "Czwartek 03:00", "sys_data": "2026-06-25 03:00", "gospodarz": "RPA", "gosc": "Korea Południowa", "wynik_g": "", "wynik_b": ""},
     {"id": 53, "data": "Czwartek 03:00", "sys_data": "2026-06-25 03:00", "gospodarz": "Czechy", "gosc": "Meksyk", "wynik_g": "", "wynik_b": ""},
-    {"id": 54, "data": "Czwartek 22:00", "sys_data": "2026-06-25 22:00", "gospodarz": "Curaçao", "gosc": "WKS", "wynik_g": "", "wynik_b": ""},
+    {"id": 54, "data": "Czwartek 22:00", "sys_data": "2026-06-25 22:00", "gospodarz": "Curaçao", "gosc": "Wybrzeże Kości Słoniowej", "wynik_g": "", "wynik_b": ""},
     {"id": 55, "data": "Czwartek 22:00", "sys_data": "2026-06-25 22:00", "gospodarz": "Ekwador", "gosc": "Niemcy", "wynik_g": "", "wynik_b": ""},
 
     # 26 czerwca
@@ -107,7 +97,21 @@ mecze = [
     {"id": 58, "data": "Piątek 04:00", "sys_data": "2026-06-26 04:00", "gospodarz": "Paragwaj", "gosc": "Australia", "wynik_g": "", "wynik_b": ""},
     {"id": 59, "data": "Piątek 04:00", "sys_data": "2026-06-26 04:00", "gospodarz": "Turcja", "gosc": "USA", "wynik_g": "", "wynik_b": ""},
     {"id": 60, "data": "Piątek 21:00", "sys_data": "2026-06-26 21:00", "gospodarz": "Norwegia", "gosc": "Francja", "wynik_g": "", "wynik_b": ""},
-    {"id": 61, "data": "Piątek 21:00", "sys_data": "2026-06-26 21:00", "gospodarz": "Senegal", "gosc": "Irak", "wynik_g": "", "wynik_b": ""}
+    {"id": 61, "data": "Piątek 21:00", "sys_data": "2026-06-26 21:00", "gospodarz": "Senegal", "gosc": "Irak", "wynik_g": "", "wynik_b": ""},
+
+    # 27 czerwca
+    {"id": 62, "data": "Sobota 02:00", "sys_data": "2026-06-27 02:00", "gospodarz": "Republika Zielonego Przylądka", "gosc": "Arabia Saudyjska", "wynik_g": "", "wynik_b": ""},
+    {"id": 63, "data": "Sobota 02:00", "sys_data": "2026-06-27 02:00", "gospodarz": "Urugwaj", "gosc": "Hiszpania", "wynik_g": "", "wynik_b": ""},
+    {"id": 64, "data": "Sobota 05:00", "sys_data": "2026-06-27 05:00", "gospodarz": "Egipt", "gosc": "Iran", "wynik_g": "", "wynik_b": ""},
+    {"id": 65, "data": "Sobota 05:00", "sys_data": "2026-06-27 05:00", "gospodarz": "Nowa Zelandia", "gosc": "Belgia", "wynik_g": "", "wynik_b": ""},
+    {"id": 66, "data": "Sobota 23:00", "sys_data": "2026-06-27 23:00", "gospodarz": "Chorwacja", "gosc": "Ghana", "wynik_g": "", "wynik_b": ""},
+    {"id": 67, "data": "Sobota 23:00", "sys_data": "2026-06-27 23:00", "gospodarz": "Panama", "gosc": "Anglia", "wynik_g": "", "wynik_b": ""},
+
+    # 28 czerwca
+    {"id": 68, "data": "Niedziela 01:30", "sys_data": "2026-06-28 01:30", "gospodarz": "DR Konga", "gosc": "Uzbekistan", "wynik_g": "", "wynik_b": ""},
+    {"id": 69, "data": "Niedziela 01:30", "sys_data": "2026-06-28 01:30", "gospodarz": "Kolumbia", "gosc": "Portugalia", "wynik_g": "", "wynik_b": ""},
+    {"id": 70, "data": "Niedziela 04:00", "sys_data": "2026-06-28 04:00", "gospodarz": "Algieria", "gosc": "Austria", "wynik_g": "", "wynik_b": ""},
+    {"id": 71, "data": "Niedziela 04:00", "sys_data": "2026-06-28 04:00", "gospodarz": "Jordania", "gosc": "Argentyna", "wynik_g": "", "wynik_b": ""}
 ]
 
 # LISTA UCZESTNIKÓW
@@ -350,7 +354,7 @@ HTML_TEMPLATE = """
             <details class="zakonczone-sekcja">
                 <summary>⬇️ Rozwiń zakończone mecze ({{ ns.zablokowane }}) ⬇️</summary>
                 <div style="padding: 0 10px;">
-                {% for m in mecze|reverse %}
+                {% for m in mecze %}
                     {% if m.zablokowany %}
                     <div class="mecz-row" style="background-color: #fcfcfc;">
                         <div class="mecz-header">
@@ -430,3 +434,92 @@ HTML_TEMPLATE = """
     </div>
 </body>
 </html>
+"""
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    wiadomosc = ""
+    
+    # 1. Kłódki czasowe
+    now_pl = datetime.utcnow() + timedelta(hours=2)
+    for m in mecze:
+        if "sys_data" in m:
+            m_time = datetime.strptime(m["sys_data"], "%Y-%m-%d %H:%M")
+            m["zablokowany"] = now_pl >= m_time
+        else:
+            m["zablokowany"] = False
+
+    # 2. Zapisywanie z frontendu
+    if request.method == "POST":
+        current_user = session.get("user")
+        zmiana = False
+        
+        if current_user == "Admin":
+            for m in mecze:
+                nowy_g = request.form.get(f"wynik_g_{m['id']}")
+                nowy_b = request.form.get(f"wynik_b_{m['id']}")
+                if nowy_g is not None and nowy_b is not None:
+                    if m["wynik_g"] != nowy_g or m["wynik_b"] != nowy_b:
+                        m["wynik_g"] = nowy_g
+                        m["wynik_b"] = nowy_b
+                        zmiana = True
+        
+        if current_user:
+            for m in mecze:
+                if current_user != "Admin" and m["zablokowany"]:
+                    continue
+                for gracz in lista_graczy:
+                    if current_user == "Admin" or current_user == gracz:
+                        tg = request.form.get(f"typ_g_{gracz}_{m['id']}")
+                        tb = request.form.get(f"typ_b_{gracz}_{m['id']}")
+                        if tg is not None and tb is not None:
+                            if typy[gracz][m["id"]]["typ_g"] != tg or typy[gracz][m["id"]]["typ_b"] != tb:
+                                typy[gracz][m["id"]]["typ_g"] = tg
+                                typy[gracz][m["id"]]["typ_b"] = tb
+                                zmiana = True
+                                
+        if zmiana:
+            zapisz_dane()
+            wiadomosc = "✅ Pomyślnie zapisano wyniki!"
+
+    przelicz_wszystko()
+            
+    # SORTOWANIE
+    totale_sorted = sorted(totale.items(), key=lambda x: x[1], reverse=True)
+    
+    # LUZACKIE NUMEROWANIE MIEJSC
+    ranking_z_miejscami = []
+    aktualne_miejsce = 1
+    for i, (g, p) in enumerate(totale_sorted):
+        if i > 0 and p < totale_sorted[i-1][1]:
+            aktualne_miejsce += 1
+        ranking_z_miejscami.append((aktualne_miejsce, g, p))
+        
+    # PODIUM
+    punkty_dodatnie = sorted(list(set([p for p in totale.values() if p > 0])), reverse=True)
+    podium_data = []
+    for i in range(3):
+        if i < len(punkty_dodatnie):
+            pkt = punkty_dodatnie[i]
+            gracze = [g for g, p in totale.items() if p == pkt]
+            podium_data.append((", ".join(gracze), pkt))
+        else:
+            podium_data.append(("---", 0))
+
+    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking_z_miejscami, podium=podium_data, wiadomosc=wiadomosc)
+
+@app.route("/login", methods=["POST"])
+def login():
+    user = request.form.get("user_name")
+    pas = request.form.get("pass")
+    if user == "Admin" and pas == "admin2026": session["user"] = "Admin"
+    elif user in lista_graczy and pas == "1234": session["user"] = user
+    return redirect(url_for("index"))
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(debug=True)
