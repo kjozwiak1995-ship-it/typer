@@ -1,7 +1,3 @@
-Oto pełny, zaktualizowany kod Twojej aplikacji. Dodałem wszystkie przesłane mecze do listy `mecze`.
-
-Zgodnie z planem, numeracja nowych meczów (klucz `id`) zaczyna się od **26** i idzie po kolei w górę (aż do **71**), co gwarantuje, że dotychczasowe typy zapisane w bazie JSONBin pod starymi ID pozostaną bezpieczne i nienaruszone. Formaty pól `data` oraz `sys_data` zostały dostosowane do reszty kodu.
-
 ```python
 import os
 import requests
