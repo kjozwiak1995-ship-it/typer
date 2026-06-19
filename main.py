@@ -1,13 +1,19 @@
 import os
-import sqlite3
+import requests
 from flask import Flask, render_template_string, request, session, redirect, url_for
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "mundial_2026_ekipa"
 
-# --- LOKALNA BAZA DANYCH (Zamiast zawodnego JSONBin) ---
-DB_FILE = "typer.db"
+# KREDENCJAŁY BAZY DANYCH JSONBIN
+BIN_ID = "6a2bc4f8da38895dfeb38af7"
+API_KEY = "$2a$10$VyqGJb1B1B6JJTNmndInGetz3wNmPkBpM//mfUyDdAvf3wsGhH0jW"
+JSONBIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
+HEADERS = {
+    "Content-Type": "application/json",
+    "X-Master-Key": API_KEY
+}
 
 # BAZA MECZÓW
 mecze = [
@@ -98,7 +104,7 @@ lista_graczy = [
     "Oliwia", "Szymon", "Oliwier", "Patrycja C"
 ]
 
-# STARTOWE TYPY (Tylko mecze historyczne jako fallback)
+# STARTOWE TYPY
 startowe_typy = {
     "Andrzej": {0: (3, 1), 1: (2, 1)}, "Jakub": {0: (1, 1), 1: (1, 1)}, "Daniel": {0: (2, 0), 1: (2, 1)},
     "Klaudia T": {0: (2, 1), 1: (1, 0)}, "Agnieszka": {0: (2, 0), 1: (1, 1)}, "Patrycja A": {0: (2, 0), 1: (1, 1)},
@@ -108,73 +114,50 @@ startowe_typy = {
     "Tomek": {0: (2, 1), 1: (1, 2)}, "Oliwia": {3: (2, 0)}, "Szymon": {}, "Oliwier": {}, "Patrycja C": {}
 }
 
-# Słownik w pamięci podręcznej serwera
 typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 totale = {gracz: 0 for gracz in lista_graczy}
 
-# --- INICJALIZACJA STRUKTURY LOKALNEJ BAZY ---
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS wyniki_meczów (
-            mecz_id INTEGER PRIMARY KEY,
-            wynik_g TEXT,
-            wynik_b TEXT
-        )
-    """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS typy_graczy (
-            gracz TEXT,
-            mecz_id INTEGER,
-            typ_g TEXT,
-            typ_b TEXT,
-            PRIMARY KEY (gracz, mecz_id)
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
-
-def wczytaj_dane_sqlite():
-    # 1. Czyszczenie starych danych z pamięci podręcznej serwera i ładowanie fallbacków
-    for g in lista_graczy:
-        for m in mecze:
-            typy[g][m["id"]]["typ_g"] = ""
-            typy[g][m["id"]]["typ_b"] = ""
-            m["wynik_g"] = "2" if m["id"] == 0 else ("2" if m["id"] == 1 else "")
-            m["wynik_b"] = "0" if m["id"] == 0 else ("1" if m["id"] == 1 else "")
+def wczytaj_dane():
+    try:
+        response = requests.get(JSONBIN_URL, headers=HEADERS)
+        if response.status_code == 200:
+            dane = response.json().get("record", {})
+            if dane.get("status") == "start":
+                return
             
-    for gracz, m_typy in startowe_typy.items():
-        for m_id, (tg, tb) in m_typy.items():
-            if m_id in typy[gracz]:
-                typy[gracz][m_id]["typ_g"] = str(tg)
-                typy[gracz][m_id]["typ_b"] = str(tb)
+            if "typy" in dane:
+                for gracz in lista_graczy:
+                    if gracz in dane["typy"]:
+                        for m in mecze:
+                            m_str = str(m["id"])
+                            if m_str in dane["typy"][gracz]:
+                                typy[gracz][m["id"]]["typ_g"] = str(dane["typy"][gracz][m_str].get("typ_g", ""))
+                                typy[gracz][m["id"]]["typ_b"] = str(dane["typy"][gracz][m_str].get("typ_b", ""))
+            
+            if "mecze_wyniki" in dane:
+                for m in mecze:
+                    m_str = str(m["id"])
+                    if m_str in dane["mecze_wyniki"]:
+                        m["wynik_g"] = str(dane["mecze_wyniki"][m_str].get("wynik_g", ""))
+                        m["wynik_b"] = str(dane["mecze_wyniki"][m_str].get("wynik_b", ""))
+    except Exception as e:
+        print("Błąd pobierania danych:", e)
 
-    # 2. Pobieranie danych z bazy SQLite
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+def zapisz_dane():
+    typy_do_zapisu = {gracz: {str(m_id): data for m_id, data in m_dict.items()} for gracz, m_dict in typy.items()}
+    mecze_do_zapisu = {str(m["id"]): {"wynik_g": m["wynik_g"], "wynik_b": m["wynik_b"]} for m in mecze}
     
-    cursor.execute("SELECT mecz_id, wynik_g, wynik_b FROM wyniki_meczów")
-    for row in cursor.fetchall():
-        m_id, wg, wb = row
-        for m in mecze:
-            if m["id"] == m_id:
-                m["wynik_g"] = wg
-                m["wynik_b"] = wb
-
-    cursor.execute("SELECT gracz, mecz_id, typ_g, typ_b FROM typy_graczy")
-    for row in cursor.fetchall():
-        gracz, m_id, tg, tb = row
-        if gracz in typy and m_id in typy[gracz]:
-            typy[gracz][m_id]["typ_g"] = tg
-            typy[gracz][m_id]["typ_b"] = tb
-            
-    conn.close()
+    dane = {
+        "typy": typy_do_zapisu,
+        "mecze_wyniki": mecze_do_zapisu
+    }
+    try:
+        requests.put(JSONBIN_URL, json=dane, headers=HEADERS)
+    except Exception as e:
+        print("Błąd zapisu danych:", e)
 
 def przelicz_wszystko():
-    # 1. PRZYPISANIE PUNKTÓW BONUSOWYCH / KOREKTA RANKINGU
+    # Ręczna korekta punktów bonusowych
     for g in lista_graczy: 
         if g == "Julia":
             totale[g] = 3
@@ -183,10 +166,8 @@ def przelicz_wszystko():
         else:
             totale[g] = 1
             
-    # 2. LICZENIE PUNKTÓW Z MECZÓW
     for m in mecze:
         wg_raw, wb_raw = str(m["wynik_g"]).strip(), str(m["wynik_b"]).strip()
-        
         if not wg_raw.isdigit() or not wb_raw.isdigit():
             for g in lista_graczy:
                 typy[g][m["id"]]["punkty"] = 0
@@ -194,10 +175,8 @@ def przelicz_wszystko():
             continue
             
         wg, wb = int(wg_raw), int(wb_raw)
-        
         for g in lista_graczy:
             tg_raw, tb_raw = str(typy[g][m["id"]]["typ_g"]).strip(), str(typy[g][m["id"]]["typ_b"]).strip()
-            
             if not tg_raw.isdigit() or not tb_raw.isdigit():
                 typy[g][m["id"]]["punkty"] = 0
                 typy[g][m["id"]]["kolor"] = "#FFC7CE" if (tg_raw != "" or tb_raw != "") else "#f3f4f6"
@@ -212,6 +191,7 @@ def przelicz_wszystko():
             typy[g][m["id"]]["kolor"] = kol
             totale[g] += pkt
 
+# TYMCZASOWY SZABLON Z BLĘDEM TECHNICZNYM
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -219,208 +199,43 @@ HTML_TEMPLATE = """
     <title>Decathlon Typer MŚ 2026</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 10px; color: #333; }
-        .container { max-width: 1000px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); margin: 0 auto; }
-        .logo-wrapper { text-align: center; margin-bottom: 25px; padding-top: 10px; }
-        h1 { color: #002244; text-align: center; font-size: 24px; margin-top: 5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
-        .alert-success { background-color: #d4edda; color: #155724; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-weight: bold; font-size: 16px; box-shadow: 0 2px 10px rgba(40,167,69,0.1); }
-        .login-bar { background: #002244; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; }
-        .login-bar a { color: #00EDFF; text-decoration: none; margin-left: 10px; }
-        .login-bar select, .login-bar input, .login-bar button { padding: 4px 8px; border-radius: 4px; border: none; margin: 2px; font-size: 14px; }
-        .login-bar button { background: #007D8F; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .legend-box { background: #e6f2f4; border-left: 5px solid #007D8F; padding: 12px 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px; color: #002244; }
-        .legend-box ul { margin: 8px 0 0 20px; padding: 0; }
-        .legend-box li { margin-bottom: 6px; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; margin-right: 5px; }
-        .badge-3 { background: #C6EFCE; color: #006100; border: 1px solid #a3d9a5; }
-        .badge-1 { background: #FFEB9C; color: #9C6500; border: 1px solid #e0c870; }
-        .badge-0 { background: #FFC7CE; color: #9C0006; border: 1px solid #e0a4aa; }
-        
-        .podium-wrap { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-bottom: 25px; text-align: center; color: white; font-weight: bold; }
-        .podium-block { width: 32%; border-radius: 12px 12px 0 0; border: 1px solid rgba(255,255,255,0.1); padding: 15px 5px; position: relative; }
-        .p-name { font-size: 13px; margin: 5px 0; display: block; white-space: normal; word-wrap: break-word; line-height: 1.3; }
-        .p-pts { color: #00EDFF; font-size: 18px; font-weight: 800; display: block; margin-top: 5px;}
-        .p-1 { min-height: 140px; background: linear-gradient(180deg, #FFD700, #007D8F); border-top: 5px solid #FFD700; box-shadow: 0 -4px 15px rgba(255,215,0,0.3); order: 2;}
-        .p-1 .p-rank { font-size: 30px; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); }
-        .p-2 { min-height: 110px; background: linear-gradient(180deg, #C0C0C0, #002244); border-top: 5px solid #C0C0C0; order: 1;}
-        .p-2 .p-rank { font-size: 24px; color: #C0C0C0; }
-        .p-3 { min-height: 90px; background: linear-gradient(180deg, #CD7F32, #002244); border-top: 5px solid #CD7F32; order: 3;}
-        .p-3 .p-rank { font-size: 22px; color: #CD7F32; }
-
-        .ranking-sidebar { background: #002244; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
-        .ranking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 12px; font-size: 13px; }
-        .ranking-item { background: rgba(255,255,255,0.07); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        
-        .mecz-row { background: #ffffff; border: 1px solid #e0e6ed; padding: 15px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .mecz-header { font-weight: bold; color: #007D8F; background: #e6f2f4; padding: 6px 12px; border-radius: 6px; font-size: 14px; display: inline-block; }
-        .grid-typy { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; margin-top: 15px; }
-        .gracz-card { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; }
-        input[type="text"] { width: 35px; padding: 5px; text-align: center; font-size: 14px; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; }
-        .btn { background: #007D8F; color: white; padding: 14px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,125,143,0.25); }
-        
-        .zakonczone-sekcja { background: #f8f9fa; border: 2px dashed #ced4da; border-radius: 12px; margin-bottom: 30px; }
-        .zakonczone-sekcja summary { font-weight: 800; color: #6c757d; cursor: pointer; padding: 15px; text-align: center; list-style: none; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; outline: none; transition: 0.2s; user-select: none; }
-        .zakonczone-sekcja summary:hover { color: #002244; background: #e9ecef; border-radius: 12px; }
-        .zakonczone-sekcja summary::-webkit-details-marker { display: none; }
-        .zakonczone-sekcja[open] summary { border-bottom: 2px dashed #ced4da; border-radius: 12px 12px 0 0; margin-bottom: 15px; background: transparent;}
-        .naglowek-sekcji { text-align: center; color: #002244; margin: 20px 0 25px 0; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f4f7f6; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: #333; 
+        }
+        .error-container { 
+            text-align: center; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06); 
+            max-width: 90%;
+            border-top: 6px solid #dc3545;
+        }
+        h1 { 
+            color: #dc3545; 
+            font-size: 28px; 
+            margin-bottom: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+        }
+        p { 
+            color: #6c757d; 
+            font-size: 16px; 
+            margin: 0; 
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-wrapper">
-            <h1>🏆 TYPER EKIPY 🏆</h1>
-        </div>
-
-        {% if wiadomosc %}
-        <div class="alert-success">
-            {{ wiadomosc }}
-        </div>
-        {% endif %}
-        
-        <div class="login-bar">
-            {% if session.get('user') %}
-                Zalogowany: <span style="color:#00EDFF; font-size:18px;">{{ session['user'] }}</span> | <a href="/logout">Wyloguj się</a>
-            {% else %}
-                <form action="/login" method="POST" style="display:inline;">
-                    Gracz: 
-                    <select name="user_name">
-                        <option value="Admin">--- ADMIN ---</option>
-                        {% for g in lista_graczy %}<option value="{{ g }}">{{ g }}</option>{% endfor %}
-                    </select>
-                    Kod: <input type="password" name="pass" placeholder="****" style="width:50px;">
-                    <button type="submit">Wejdź</button>
-                </form>
-            {% endif %}
-        </div>
-
-        <div class="legend-box">
-            <b>Zasady punktacji:</b>
-            <ul>
-                <li><span class="badge badge-3">3 pkt</span> Idealnie trafiony wynik</li>
-                <li><span class="badge badge-1">1 pkt</span> Trafiony zwycięzca lub remis</li>
-                <li><span class="badge badge-0">0 pkt</span> Całkowity błąd</li>
-            </ul>
-        </div>
-
-        <div class="ranking-sidebar">
-            <div style="font-weight: bold; text-align: center; letter-spacing: 1px;">📊 OFICJALNY RANKING</div>
-            
-            <div class="podium-wrap">
-                <div class="podium-block p-2">
-                    <div class="p-rank">2</div>
-                    <span class="p-name">{{ podium[1][0] }}</span>
-                    <span class="p-pts">{% if podium[1][1] > 0 %}{{ podium[1][1] }} pkt{% endif %}</span>
-                </div>
-                <div class="podium-block p-1">
-                    <div class="p-rank">👑</div>
-                    <span class="p-name">{{ podium[0][0] }}</span>
-                    <span class="p-pts">{% if podium[0][1] > 0 %}{{ podium[0][1] }} pkt{% endif %}</span>
-                </div>
-                <div class="podium-block p-3">
-                    <div class="p-rank">3</div>
-                    <span class="p-name">{{ podium[2][0] }}</span>
-                    <span class="p-pts">{% if podium[2][1] > 0 %}{{ podium[2][1] }} pkt{% endif %}</span>
-                </div>
-            </div>
-
-            <div class="ranking-grid">
-                {% for miejsce, gracz, pkt in ranking %}
-                <div class="ranking-item"><b>{{ miejsce }}. {{ gracz }}</b><br><span style="color:#00EDFF; font-size:16px;">{{ pkt }} pkt</span></div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <form method="POST">
-            {% set ns = namespace(zablokowane=0, aktywne=0) %}
-            {% for m in mecze %}
-                {% if m.zablokowany %}
-                    {% set ns.zablokowane = ns.zablokowane + 1 %}
-                {% else %}
-                    {% set ns.aktywne = ns.aktywne + 1 %}
-                {% endif %}
-            {% endfor %}
-
-            {% if ns.zablokowane > 0 %}
-            <details class="zakonczone-sekcja">
-                <summary>⬇️ Rozwiń zakończone mecze ({{ ns.zablokowane }}) ⬇️</summary>
-                <div style="padding: 0 10px;">
-                {% for m in mecze|reverse %}
-                    {% if m.zablokowany %}
-                    <div class="mecz-row" style="background-color: #fcfcfc;">
-                        <div class="mecz-header">
-                            ⏰ {{ m.data }} <span style="color: #dc3545; margin-left: 10px;">🔒 ZABLOKOWANY</span>
-                        </div>
-                        <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
-                            {{ m.gospodarz }} 
-                            <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
-                            :
-                            <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
-                            {{ m.gosc }}
-                        </div>
-                        
-                        <div class="grid-typy">
-                            {% for gracz in lista_graczy %}
-                            {% set g_typ = typy[gracz][m['id']] %}
-                            {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
-                            <div class="gracz-card" style="background-color: {{ g_typ.kolor }}; opacity: 0.85;">
-                                <span>{{ gracz }}</span>
-                                <div>
-                                    <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
-                                    :
-                                    <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                {% endfor %}
-                </div>
-            </details>
-            {% endif %}
-
-            {% if ns.aktywne > 0 %}
-            <div class="naglowek-sekcji">🔥 MECZE DO TYPOWANIA ({{ ns.aktywne }}) 🔥</div>
-            {% for m in mecze %}
-                {% if not m.zablokowany %}
-                <div class="mecz-row">
-                    <div class="mecz-header">
-                        ⏰ {{ m.data }} 
-                    </div>
-                    <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
-                        {{ m.gospodarz }} 
-                        <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
-                        :
-                        <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
-                        {{ m.gosc }}
-                    </div>
-                    
-                    <div class="grid-typy">
-                        {% for gracz in lista_graczy %}
-                        {% set g_typ = typy[gracz][m['id']] %}
-                        {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
-                        <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
-                            <span>{{ gracz }}</span>
-                            <div>
-                                <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
-                                :
-                                <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
-            {% else %}
-            <div class="naglowek-sekcji">🏁 WSZYSTKIE MECZE ZAKOŃCZONE 🏁</div>
-            {% endif %}
-            
-            {% if session.get('user') %}
-            <button type="submit" class="btn">🚀 ZAPISZ MOJE ZMIANY / WYNIKI</button>
-            {% endif %}
-        </form>
+    <div class="error-container">
+        <h1>⚠️ Błąd techniczny ⚠️</h1>
+        <p>Trwają prace konserwacyjne nad aplikacją. Spróbuj ponownie później.</p>
     </div>
 </body>
 </html>
@@ -428,86 +243,15 @@ HTML_TEMPLATE = """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    wiadomosc = None
-    
-    # 1. ŚWIEŻE WCZYTANIE DANYCH PRZY KAŻDYM ŻĄDANIU
-    wczytaj_dane_sqlite()
-    
-    # 2. AKTUALIZACJA BLOKAD CZASOWYCH MECZÓW
-    teraz = datetime.now()
-    for m in mecze:
-        try:
-            m_data = datetime.strptime(m["sys_data"], "%Y-%m-%d %H:%M")
-            m["zablokowany"] = teraz >= (m_data - timedelta(minutes=15))
-        except:
-            m["zablokowany"] = False
-
-    # 3. OBSŁUGA ZAPISU FORMULARZA (SQLite)
-    if request.method == "POST":
-        user = session.get("user")
-        if user:
-            conn = sqlite3.connect(DB_FILE)
-            cursor = conn.cursor()
-            
-            for m in mecze:
-                m_id = m["id"]
-                if user == "Admin":
-                    wg = request.form.get(f"wynik_g_{m_id}", "")
-                    wb = request.form.get(f"wynik_b_{m_id}", "")
-                    m["wynik_g"] = wg
-                    m["wynik_b"] = wb
-                    cursor.execute("""
-                        INSERT INTO wyniki_meczów (mecz_id, wynik_g, wynik_b)
-                        VALUES (?, ?, ?)
-                        ON CONFLICT(mecz_id) DO UPDATE SET wynik_g=excluded.wynik_g, wynik_b=excluded.wynik_b
-                    """, (m_id, wg, wb))
-                
-                if user == "Admin" or not m.get("zablokowany", False):
-                    tg = request.form.get(f"typ_g_{user}_{m_id}")
-                    tb = request.form.get(f"typ_b_{user}_{m_id}")
-                    if tg is not None and tb is not None:
-                        typy[user][m_id]["typ_g"] = tg
-                        typy[user][m_id]["typ_b"] = tb
-                        cursor.execute("""
-                            INSERT INTO typy_graczy (gracz, mecz_id, typ_g, typ_b)
-                            VALUES (?, ?, ?, ?)
-                            ON CONFLICT(gracz, mecz_id) DO UPDATE SET typ_g=excluded.typ_g, typ_b=excluded.typ_b
-                        """, (user, m_id, tg, tb))
-            
-            conn.commit()
-            conn.close()
-            wiadomosc = "Dane zostały pomyślnie zapisane!"
-
-    # 4. PRZELICZENIE AKTUALNEGO RANKINGU
-    przelicz_wszystko()
-    
-    posortowani = sorted(totale.items(), key=lambda x: x[1], reverse=True)
-    ranking = []
-    miejsce = 1
-    for i, (g, pkt) in enumerate(posortowani):
-        if i > 0 and posortowani[i][1] < posortowani[i-1][1]:
-            miejsce = i + 1
-        ranking.append((miejsce, g, pkt))
-        
-    podium = [(posortowani[0] if len(posortowani) > 0 else ("", 0)),
-              (posortowani[1] if len(posortowani) > 1 else ("", 0)),
-              (posortowani[2] if len(posortowani) > 2 else ("", 0))]
-
-    return render_template_string(HTML_TEMPLATE, mecze=mecze, lista_graczy=lista_graczy, typy=typy, ranking=ranking, podium=podium, wiadomosc=wiadomosc)
+    # Zwraca tylko widok błędu, bez przetwarzania i zapisywania zmian w tle
+    return render_template_string(HTML_TEMPLATE)
 
 @app.route("/login", methods=["POST"])
 def login():
-    user = request.form.get("user_name")
-    haslo = request.form.get("pass")
-    if user == "Admin" and haslo == "admin123":
-        session["user"] = "Admin"
-    elif user in lista_graczy and haslo == "1234":
-        session["user"] = user
     return redirect(url_for("index"))
 
 @app.route("/logout")
 def logout():
-    session.pop("user", None)
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
