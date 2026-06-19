@@ -12,7 +12,8 @@ API_KEY = "$2a$10$VyqGJb1B1B6JJTNmndInGetz3wNmPkBpM//mfUyDdAvf3wsGhH0jW"
 JSONBIN_URL = f"https://api.jsonbin.io/v3/b/{BIN_ID}"
 HEADERS = {
     "Content-Type": "application/json",
-    "X-Master-Key": API_KEY
+    "X-Master-Key": API_KEY,
+    "X-Bin-Versioning": "false"  # Wyłącza tworzenie kopii zapasowych, które blokowały API
 }
 
 # BAZA MECZÓW (Zaktualizowana: historyczne zachowane, stare i nowe dodane)
@@ -140,7 +141,7 @@ startowe_typy = {
 typy = {gracz: {m["id"]: {"typ_g": "", "typ_b": "", "punkty": 0, "kolor": "white"} for m in mecze} for gracz in lista_graczy}
 for gracz, m_typy in startowe_typy.items():
     for m_id, (tg, tb) in m_typy.items():
-        if m_id in typy[gracz]:  # Zabezpieczenie na wypadek
+        if m_id in typy[gracz]:
             typy[gracz][m_id]["typ_g"] = str(tg)
             typy[gracz][m_id]["typ_b"] = str(tb)
 
@@ -182,9 +183,14 @@ def zapisz_dane():
         "mecze_wyniki": mecze_do_zapisu
     }
     try:
-        requests.put(JSONBIN_URL, json=dane, headers=HEADERS)
+        response = requests.put(JSONBIN_URL, json=dane, headers=HEADERS)
+        if response.status_code != 200:
+            print(f"BŁĄD API JSONBIN: {response.status_code} - {response.text}")
+            return False
+        return True
     except Exception as e:
-        print("Błąd zapisu danych:", e)
+        print("Błąd zapisu danych (Wyjątek):", e)
+        return False
 
 wczytaj_dane()
 # ------------------------------------------------------
@@ -230,7 +236,10 @@ HTML_TEMPLATE = """
         .container { max-width: 1000px; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); margin: 0 auto; }
         .logo-wrapper { text-align: center; margin-bottom: 25px; padding-top: 10px; }
         h1 { color: #002244; text-align: center; font-size: 24px; margin-top: 5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        
         .alert-success { background-color: #d4edda; color: #155724; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb; font-weight: bold; font-size: 16px; box-shadow: 0 2px 10px rgba(40,167,69,0.1); }
+        .alert-error { background-color: #f8d7da; color: #721c24; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb; font-weight: bold; font-size: 16px; box-shadow: 0 2px 10px rgba(220,53,69,0.1); }
+        
         .login-bar { background: #002244; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; }
         .login-bar a { color: #00EDFF; text-decoration: none; margin-left: 10px; }
         .login-bar select, .login-bar input, .login-bar button { padding: 4px 8px; border-radius: 4px; border: none; margin: 2px; font-size: 14px; }
@@ -272,6 +281,10 @@ HTML_TEMPLATE = """
         .zakonczone-sekcja summary::-webkit-details-marker { display: none; }
         .zakonczone-sekcja[open] summary { border-bottom: 2px dashed #ced4da; border-radius: 12px 12px 0 0; margin-bottom: 15px; background: transparent;}
         .naglowek-sekcji { text-align: center; color: #002244; margin: 20px 0 25px 0; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+
+        /* NOWE STYLE DLA MECZÓW NA ŻYWO */
+        @keyframes blinker { 50% { opacity: 0.3; } }
+        .live-pulse { animation: blinker 1.5s linear infinite; color: white; margin-left: 10px; font-weight: 800; }
     </style>
 </head>
 <body>
@@ -282,7 +295,7 @@ HTML_TEMPLATE = """
         </div>
 
         {% if wiadomosc %}
-        <div class="alert-success">
+        <div class="{% if 'BŁĄD' in wiadomosc %}alert-error{% else %}alert-success{% endif %}">
             {{ wiadomosc }}
         </div>
         {% endif %}
@@ -341,24 +354,26 @@ HTML_TEMPLATE = """
         </div>
 
         <form method="POST">
-            {% set ns = namespace(zablokowane=0, aktywne=0) %}
+            {% set ns = namespace(zakonczone=0, trwajace=0, nadchodzace=0) %}
             {% for m in mecze %}
-                {% if m.zablokowany %}
-                    {% set ns.zablokowane = ns.zablokowane + 1 %}
+                {% if m.status_meczu == 'zakonczony' %}
+                    {% set ns.zakonczone = ns.zakonczone + 1 %}
+                {% elif m.status_meczu == 'trwa' %}
+                    {% set ns.trwajace = ns.trwajace + 1 %}
                 {% else %}
-                    {% set ns.aktywne = ns.aktywne + 1 %}
+                    {% set ns.nadchodzace = ns.nadchodzace + 1 %}
                 {% endif %}
             {% endfor %}
 
-            {% if ns.zablokowane > 0 %}
+            {% if ns.zakonczone > 0 %}
             <details class="zakonczone-sekcja">
-                <summary>⬇️ Rozwiń zakończone mecze ({{ ns.zablokowane }}) ⬇️</summary>
+                <summary>⬇️ Rozwiń zakończone mecze ({{ ns.zakonczone }}) ⬇️</summary>
                 <div style="padding: 0 10px;">
                 {% for m in mecze %}
-                    {% if m.zablokowany %}
+                    {% if m.status_meczu == 'zakonczony' %}
                     <div class="mecz-row" style="background-color: #fcfcfc;">
                         <div class="mecz-header">
-                            ⏰ {{ m.data }} <span style="color: #dc3545; margin-left: 10px;">🔒 ZABLOKOWANY</span>
+                            ⏰ {{ m.data }} <span style="color: #dc3545; margin-left: 10px;">🔒 ZAKOŃCZONY</span>
                         </div>
                         <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
                             {{ m.gospodarz }} 
@@ -389,10 +404,45 @@ HTML_TEMPLATE = """
             </details>
             {% endif %}
 
-            {% if ns.aktywne > 0 %}
-            <div class="naglowek-sekcji">🔥 MECZE DO TYPOWANIA ({{ ns.aktywne }}) 🔥</div>
+            {% if ns.trwajace > 0 %}
+            <div class="naglowek-sekcji" style="color: #dc3545;">🔴 MECZE NA ŻYWO ({{ ns.trwajace }}) 🔴</div>
             {% for m in mecze %}
-                {% if not m.zablokowany %}
+                {% if m.status_meczu == 'trwa' %}
+                <div class="mecz-row" style="border: 2px solid #dc3545; box-shadow: 0 0 12px rgba(220, 53, 69, 0.15);">
+                    <div class="mecz-header" style="background: #dc3545; color: white;">
+                        ⏰ {{ m.data }} <span class="live-pulse">🔴 W TRAKCIE (BLOKADA TYPÓW)</span>
+                    </div>
+                    <div style="margin: 15px 0; font-size: 18px; font-weight: bold; color: #002244;">
+                        {{ m.gospodarz }} 
+                        <input type="text" name="wynik_g_{{ m['id'] }}" value="{{ m.wynik_g }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                        :
+                        <input type="text" name="wynik_b_{{ m['id'] }}" value="{{ m.wynik_b }}" {% if session.get('user') != 'Admin' %}readonly style="background:#eee; color:#666;"{% endif %} style="border: 2px solid #002244; width: 40px;">
+                        {{ m.gosc }}
+                    </div>
+                    
+                    <div class="grid-typy">
+                        {% for gracz in lista_graczy %}
+                        {% set g_typ = typy[gracz][m['id']] %}
+                        {% set blokada_dla_gracza = m.zablokowany and session.get('user') != 'Admin' %}
+                        <div class="gracz-card" style="background-color: {{ g_typ.kolor }};">
+                            <span>{{ gracz }}</span>
+                            <div>
+                                <input type="text" name="typ_g_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_g }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                                :
+                                <input type="text" name="typ_b_{{ gracz }}_{{ m['id'] }}" value="{{ g_typ.typ_b }}" {% if blokada_dla_gracza or (session.get('user') != gracz and session.get('user') != 'Admin') %}readonly style="background:rgba(0,0,0,0.05); border:none;"{% endif %}>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+            {% endif %}
+
+            {% if ns.nadchodzace > 0 %}
+            <div class="naglowek-sekcji">🔥 MECZE DO TYPOWANIA ({{ ns.nadchodzace }}) 🔥</div>
+            {% for m in mecze %}
+                {% if m.status_meczu == 'nadchodzi' %}
                 <div class="mecz-row">
                     <div class="mecz-header">
                         ⏰ {{ m.data }} 
@@ -422,8 +472,6 @@ HTML_TEMPLATE = """
                 </div>
                 {% endif %}
             {% endfor %}
-            {% else %}
-            <div class="naglowek-sekcji">🏁 WSZYSTKIE MECZE ZAKOŃCZONE 🏁</div>
             {% endif %}
             
             {% if session.get('user') %}
@@ -440,13 +488,25 @@ HTML_TEMPLATE = """
 def index():
     wiadomosc = ""
     
-    # 1. Kłódki czasowe
+    # 1. Kłódki czasowe i nowe statusy (Nadchodzi / Trwa / Zakończony)
     now_pl = datetime.utcnow() + timedelta(hours=2)
     for m in mecze:
         if "sys_data" in m:
             m_time = datetime.strptime(m["sys_data"], "%Y-%m-%d %H:%M")
-            m["zablokowany"] = now_pl >= m_time
+            # Mecz uznajemy za "trwający" przez 2h i 15 minut (90m + przerwa + doliczony)
+            czas_konca = m_time + timedelta(hours=2, minutes=15)
+            
+            if now_pl < m_time:
+                m["status_meczu"] = "nadchodzi"
+                m["zablokowany"] = False
+            elif m_time <= now_pl <= czas_konca:
+                m["status_meczu"] = "trwa"
+                m["zablokowany"] = True
+            else:
+                m["status_meczu"] = "zakonczony"
+                m["zablokowany"] = True
         else:
+            m["status_meczu"] = "nadchodzi"
             m["zablokowany"] = False
 
     # 2. Zapisywanie z frontendu
@@ -479,8 +539,11 @@ def index():
                                 zmiana = True
                                 
         if zmiana:
-            zapisz_dane()
-            wiadomosc = "✅ Pomyślnie zapisano wyniki!"
+            sukces = zapisz_dane()
+            if sukces:
+                wiadomosc = "✅ Pomyślnie trwale zapisano wyniki!"
+            else:
+                wiadomosc = "❌ BŁĄD KRYTYCZNY! Baza danych odrzuciła zapis. Skontaktuj się z administratorem."
 
     przelicz_wszystko()
             
